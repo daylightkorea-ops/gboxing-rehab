@@ -1,0 +1,2070 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>G복싱 재활</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700&display=swap">
+<style>
+/* ─── design tokens ─────────────────────────────────── */
+:root {
+  --bg:        #0e1016;
+  --surface:   #161921;
+  --elevated:  #1e2230;
+  --border:    #2b3045;
+  --red:       #e02d3c;
+  --red-dim:   #3a0d12;
+  --red-soft:  rgba(224,45,60,.12);
+  --green:     #22c55e;
+  --green-dim: #052914;
+  --amber:     #f59e0b;
+  --amber-dim: #2a1c05;
+  --blue:      #4f8ef7;
+  --text:      #e2e6f2;
+  --muted:     #68738f;
+  --faint:     #3a3f52;
+  --r:         10px;
+}
+
+/* ─── reset ─────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',system-ui,sans-serif;
+     font-size:15px;line-height:1.5;min-height:100vh;-webkit-tap-highlight-color:transparent}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,textarea,select{font-family:inherit;font-size:inherit}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* ─── utility ───────────────────────────────────────── */
+.hidden{display:none!important}
+.flex{display:flex}
+.col{flex-direction:column}
+.gap-4{gap:4px}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.items-center{align-items:center}
+.justify-between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.text-muted{color:var(--muted)}
+.text-red{color:var(--red)}
+.text-green{color:var(--green)}
+.text-amber{color:var(--amber)}
+.text-blue{color:var(--blue)}
+.font-700{font-weight:700}
+.font-500{font-weight:500}
+.text-sm{font-size:13px}
+.text-xs{font-size:11px;letter-spacing:.04em}
+.text-right{text-align:right}
+.w-full{width:100%}
+.bebas{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;
+     font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.tag-stretch{background:var(--red-dim);color:var(--red)}
+.tag-disc{background:var(--amber-dim);color:var(--amber)}
+.tag-stretch-ex{background:rgba(79,142,247,.12);color:var(--blue)}
+.tag-power{background:rgba(34,197,94,.1);color:var(--green)}
+
+/* ─── card ──────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.card-lg{padding:20px}
+.card+.card,.card+.card-lg{margin-top:10px}
+
+/* ─── section title ─────────────────────────────────── */
+.section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+               color:var(--muted);margin-bottom:10px}
+
+/* ─── btn ───────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+     padding:9px 18px;border-radius:8px;font-weight:700;font-size:14px;
+     transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-red{background:var(--red);color:#fff}
+.btn-ghost{background:var(--elevated);color:var(--text);border:1px solid var(--border)}
+.btn-sm{padding:6px 12px;font-size:13px;border-radius:6px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-full{width:100%}
+
+/* ─── input ─────────────────────────────────────────── */
+.input{width:100%;padding:10px 14px;background:var(--elevated);border:1px solid var(--border);
+       border-radius:8px;color:var(--text);font-size:15px;outline:none;transition:border .15s}
+.input:focus{border-color:var(--red)}
+.input::placeholder{color:var(--muted)}
+textarea.input{resize:vertical;min-height:72px}
+.label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;
+        text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+
+/* ─── pain scale ────────────────────────────────────── */
+.pain-scale{display:flex;gap:4px}
+.pain-box{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;
+          justify-content:center;font-size:12px;font-weight:700;cursor:pointer;
+          border:2px solid transparent;transition:all .15s;color:var(--muted);background:var(--elevated)}
+.pain-box.active-0{background:rgba(34,197,94,.12);color:var(--green);border-color:var(--green)}
+.pain-box.active-1,.pain-box.active-2,.pain-box.active-3{background:var(--green-dim);color:var(--green);border-color:var(--green)}
+.pain-box.active-4,.pain-box.active-5,.pain-box.active-6{background:var(--amber-dim);color:var(--amber);border-color:var(--amber)}
+.pain-box.active-7,.pain-box.active-8,.pain-box.active-9,.pain-box.active-10{background:var(--red-dim);color:var(--red);border-color:var(--red)}
+
+/* ─── checkbox item ─────────────────────────────────── */
+.ex-item{display:flex;gap:12px;align-items:flex-start;padding:12px;
+         background:var(--elevated);border-radius:8px;border:1px solid var(--border);
+         transition:border-color .15s,background .15s;cursor:pointer}
+.ex-item.done{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.25)}
+.ex-check{width:22px;height:22px;border-radius:5px;border:2px solid var(--border);
+          flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;
+          transition:all .15s}
+.ex-item.done .ex-check{background:var(--green);border-color:var(--green)}
+.check-svg{opacity:0;transition:opacity .15s}
+.ex-item.done .check-svg{opacity:1}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:14px;font-weight:500;line-height:1.35}
+.ex-sets{font-size:12px;color:var(--muted);margin-top:3px}
+.ex-note{font-size:11px;color:var(--faint);margin-top:4px;font-style:italic}
+
+/* ─── views ─────────────────────────────────────────── */
+.view{min-height:100vh}
+
+/* ─────────────────────────────────────────────────────
+   LOGIN
+───────────────────────────────────────────────────── */
+#v-login{display:flex;flex-direction:column;align-items:center;justify-content:center;
+         min-height:100vh;padding:24px;background:var(--bg)}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:.05em;
+            color:var(--red);line-height:1;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:40px;letter-spacing:.08em;text-transform:uppercase}
+.login-card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);
+            border-radius:14px;padding:28px}
+.login-who{display:flex;gap:8px;margin-bottom:20px}
+.who-btn{flex:1;padding:10px 6px;border-radius:8px;background:var(--elevated);
+         border:2px solid var(--border);color:var(--muted);font-weight:700;font-size:13px;
+         transition:all .15s}
+.who-btn.selected{border-color:var(--red);color:var(--text);background:var(--red-soft)}
+.login-field{margin-bottom:16px}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:10px;min-height:20px}
+
+/* ─────────────────────────────────────────────────────
+   ADMIN LAYOUT
+───────────────────────────────────────────────────── */
+#v-admin{display:flex;min-height:100vh}
+.admin-sidebar{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);
+               display:flex;flex-direction:column;padding:20px 0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-brand{padding:0 18px 20px;font-family:'Bebas Neue',sans-serif;font-size:22px;
+               letter-spacing:.05em;color:var(--red)}
+.sidebar-brand span{color:var(--muted);font-size:11px;display:block;font-family:'Noto Sans KR',sans-serif;
+                    font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-top:-2px}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:10px 18px;font-size:14px;
+               font-weight:500;color:var(--muted);transition:all .15s;border-radius:0}
+.sidebar-nav a.active{color:var(--text);background:var(--elevated);border-left:3px solid var(--red)}
+.sidebar-nav a:not(.active):hover{color:var(--text);background:rgba(255,255,255,.04)}
+.sidebar-nav .nav-section{padding:14px 18px 4px;font-size:10px;font-weight:700;letter-spacing:.12em;
+                           text-transform:uppercase;color:var(--faint)}
+.sidebar-logout{margin-top:auto;padding:12px 18px 0;border-top:1px solid var(--border)}
+.admin-main{flex:1;min-width:0;padding:24px;overflow-y:auto;max-height:100vh}
+
+/* ─────────────────────────────────────────────────────
+   ADMIN SUBVIEWS
+───────────────────────────────────────────────────── */
+.subview{display:none}
+.subview.active{display:block}
+.page-header{margin-bottom:22px}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:.03em}
+.page-desc{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* user status cards (admin dashboard) */
+.user-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+@media(max-width:680px){.user-cards{grid-template-columns:1fr}}
+.user-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
+           padding:18px;cursor:pointer;transition:border-color .15s}
+.user-card:hover{border-color:var(--red)}
+.user-card-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.user-card-cond{font-size:12px;color:var(--muted);margin-bottom:14px}
+.pain-row{display:flex;justify-content:space-between;margin-bottom:8px}
+.pain-label{font-size:11px;color:var(--muted)}
+.pain-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;background:var(--red);border-radius:2px;transition:width .3s}
+
+/* schedule editor */
+.schedule-grid{display:flex;flex-direction:column;gap:8px}
+.sched-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;
+            background:var(--elevated);border-radius:8px;border:1px solid var(--border)}
+.sched-drag{color:var(--faint);cursor:grab;font-size:16px;padding-top:2px}
+.sched-info{flex:1;min-width:0}
+.sched-cat{display:inline-block;margin-bottom:4px}
+.sched-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.sched-meta{font-size:12px;color:var(--muted)}
+.sched-del{color:var(--muted);font-size:18px;padding:2px 6px;border-radius:4px;
+           transition:color .15s;flex-shrink:0}
+.sched-del:hover{color:var(--red)}
+.add-ex-form{background:var(--elevated);border:1px dashed var(--border);border-radius:8px;
+             padding:14px;margin-top:10px}
+.add-ex-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+
+/* records table */
+.records-table{width:100%;border-collapse:collapse;font-size:13px}
+.records-table th{text-align:left;padding:8px 10px;font-size:11px;font-weight:700;
+                  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+                  border-bottom:1px solid var(--border)}
+.records-table td{padding:10px;border-bottom:1px solid rgba(43,48,69,.6)}
+.records-table tr:last-child td{border-bottom:none}
+.records-table tr:hover td{background:rgba(255,255,255,.02)}
+.pain-pill{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;
+           border-radius:5px;font-size:12px;font-weight:700}
+.pain-low{background:var(--green-dim);color:var(--green)}
+.pain-mid{background:var(--amber-dim);color:var(--amber)}
+.pain-high{background:var(--red-dim);color:var(--red)}
+
+/* AI chat */
+.chat-layout{display:flex;flex-direction:column;height:calc(100vh - 160px)}
+.chat-config{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end;flex-wrap:wrap}
+.chat-messages{flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);
+               padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface);
+               scroll-behavior:smooth}
+.msg{max-width:82%;padding:11px 14px;border-radius:10px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+.msg-user{align-self:flex-end;background:var(--red);color:#fff}
+.msg-ai{align-self:flex-start;background:var(--elevated);color:var(--text)}
+.msg-system{align-self:center;background:transparent;color:var(--muted);font-size:12px;
+            border:1px dashed var(--border);text-align:center;max-width:90%}
+.chat-input-row{display:flex;gap:8px;margin-top:12px}
+.chat-input-row textarea{flex:1}
+.chat-thinking{align-self:flex-start;color:var(--muted);font-size:13px;
+               padding:8px 12px;background:var(--elevated);border-radius:8px}
+/* attachment */
+.attach-btn{width:38px;height:38px;border-radius:8px;background:var(--elevated);
+            border:1px solid var(--border);display:flex;align-items:center;
+            justify-content:center;cursor:pointer;flex-shrink:0;align-self:flex-end;
+            transition:border-color .15s;color:var(--muted)}
+.attach-btn:hover{border-color:var(--blue);color:var(--blue)}
+.attach-preview{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.attach-thumb{position:relative;width:64px;height:64px;border-radius:6px;
+              overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+.attach-thumb img,.attach-thumb video{width:100%;height:100%;object-fit:cover}
+.attach-thumb-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);
+                  border-radius:50%;width:16px;height:16px;display:flex;
+                  align-items:center;justify-content:center;cursor:pointer;
+                  font-size:10px;color:#fff;line-height:1}
+.msg-img{max-width:220px;border-radius:8px;margin-top:6px;display:block}
+.msg-video{max-width:220px;border-radius:8px;margin-top:6px;display:block}
+
+/* ─────────────────────────────────────────────────────
+   USER LAYOUT
+───────────────────────────────────────────────────── */
+#v-user{display:flex;flex-direction:column;min-height:100vh}
+.user-header{background:var(--surface);border-bottom:1px solid var(--border);
+             padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+             position:sticky;top:0;z-index:50}
+.user-header-name{font-size:13px;color:var(--muted)}
+.user-header-cond{font-size:14px;font-weight:700}
+.user-content{flex:1;padding:18px;padding-bottom:80px;overflow-y:auto}
+.user-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);
+          border-top:1px solid var(--border);display:flex;z-index:50;
+          padding-bottom:env(safe-area-inset-bottom)}
+.user-nav-btn{flex:1;padding:12px 4px;display:flex;flex-direction:column;align-items:center;
+              gap:3px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+              color:var(--muted);transition:color .15s;cursor:pointer;border:none;background:none}
+.user-nav-btn.active{color:var(--red)}
+.user-nav-icon{font-size:20px;line-height:1}
+.user-subview{display:none}
+.user-subview.active{display:block}
+
+/* D-30 countdown */
+.countdown-block{text-align:center;padding:28px 0 24px;border-bottom:1px solid var(--border);margin-bottom:20px}
+.countdown-d{font-family:'Bebas Neue',sans-serif;font-size:96px;line-height:.95;
+             color:var(--red);letter-spacing:.02em}
+.countdown-label{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.08em;text-transform:uppercase}
+.countdown-date{font-size:11px;color:var(--faint);margin-top:4px}
+.countdown-pre{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--amber)}
+.countdown-done{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--green)}
+
+/* rest day */
+.rest-day{text-align:center;padding:32px 20px;color:var(--muted)}
+.rest-icon{font-size:40px;margin-bottom:8px}
+
+/* log form */
+.log-section{margin-bottom:22px}
+.sleep-row{display:flex;gap:6px;align-items:center}
+.sleep-val{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;min-width:52px}
+.sleep-btn{width:36px;height:36px;border-radius:8px;background:var(--elevated);
+           border:1px solid var(--border);color:var(--text);font-size:18px;font-weight:700;
+           display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.sleep-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* history */
+.hist-card{padding:14px;background:var(--elevated);border-radius:8px;border:1px solid var(--border);
+           margin-bottom:8px}
+.hist-date{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.hist-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.hist-row-label{color:var(--muted)}
+
+/* settings */
+.settings-section{margin-bottom:28px}
+.settings-section h3{font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:8px;
+                      border-bottom:1px solid var(--border)}
+.settings-row{margin-bottom:14px}
+.settings-desc{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5}
+.api-key-row{display:flex;gap:8px}
+.api-key-row input{flex:1}
+
+/* ─── week grid (admin dashboard) ───────────────────── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:10px 0 12px}
+.week-cell{background:var(--elevated);border:1px solid var(--border);border-radius:5px;
+           padding:6px 3px;text-align:center;min-width:0;transition:border-color .15s}
+.week-cell.is-today{border-color:var(--red);background:var(--red-soft)}
+.week-cell.is-ex{border-color:rgba(79,142,247,.35)}
+.wk-name{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+          color:var(--muted);margin-bottom:1px}
+.wk-date{font-size:8px;color:var(--faint);margin-bottom:4px}
+.wk-badge{font-size:8px;font-weight:700;padding:2px 3px;border-radius:3px;
+          display:inline-block;margin-bottom:3px;letter-spacing:.01em}
+.wk-done{background:rgba(34,197,94,.15);color:var(--green)}
+.wk-miss{background:rgba(245,158,11,.12);color:var(--amber)}
+.wk-rest{color:var(--faint);font-size:8px;display:block;margin-bottom:3px}
+.wk-pain{font-size:8px;color:var(--muted);line-height:1.7}
+.wk-pain .p-lo{color:var(--green);font-weight:700}
+.wk-pain .p-mi{color:var(--amber);font-weight:700}
+.wk-pain .p-hi{color:var(--red);font-weight:700}
+.wk-empty{color:var(--faint);font-size:8px}
+
+/* ─── coach detail week tab ──────────────────────────── */
+.wdd-card{background:var(--elevated);border:1px solid var(--border);border-radius:8px;
+          padding:14px;margin-bottom:8px}
+.wdd-card.is-today{border-color:var(--red)}
+.wdd-card.is-ex-day{border-left:3px solid var(--blue)}
+.wdd-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.wdd-title{font-weight:700;font-size:14px}
+.wdd-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.wdd-pain-row{display:flex;gap:14px;font-size:12px;margin-bottom:10px;flex-wrap:wrap}
+.wdd-pain-item{display:flex;align-items:center;gap:5px}
+.wdd-pain-label{color:var(--muted)}
+.wdd-exlist{display:flex;flex-direction:column;gap:0}
+.wdd-ex{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;
+        border-bottom:1px solid rgba(43,48,69,.4)}
+.wdd-ex:last-child{border-bottom:none}
+.wdd-chk{width:16px;height:16px;border-radius:3px;flex-shrink:0;
+          display:flex;align-items:center;justify-content:center}
+.chk-done{background:var(--green)}
+.chk-pending{border:1.5px solid var(--border)}
+
+/* ─── coach AI chat ──────────────────────────────────── */
+.coach-chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px)}
+.coach-chat-msgs{flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);
+                 padding:16px;display:flex;flex-direction:column;gap:12px;
+                 background:var(--surface);scroll-behavior:smooth}
+.coach-chat-row{display:flex;gap:8px;margin-top:10px}
+.coach-chat-row textarea{flex:1}
+
+/* mobile admin */
+@media(max-width:768px){
+  #v-admin{flex-direction:column}
+  .admin-sidebar{width:100%;height:auto;position:static;flex-direction:row;padding:10px 0;
+                 overflow-x:auto;flex-wrap:nowrap;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-brand{display:none}
+  .sidebar-nav{display:flex;flex-direction:row;gap:2px;padding:0 8px}
+  .sidebar-nav .nav-section{display:none}
+  .sidebar-nav a{white-space:nowrap;padding:8px 12px;border-radius:8px;font-size:13px}
+  .sidebar-nav a.active{border-left:none;border-bottom:3px solid var(--red)}
+  .sidebar-logout{margin-top:0;padding:0 8px;border-top:none}
+  .admin-main{max-height:none;padding:16px}
+  .user-cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     LOGIN
+═══════════════════════════════════════════════════════ -->
+<div id="v-login" class="view">
+  <div id="login-logo" class="login-logo">G복싱</div>
+  <div class="login-sub">재활 프로그램 · Rehab Tracker</div>
+  <div class="login-card">
+    <div class="login-who flex gap-8" id="who-btns">
+      <button class="who-btn" data-who="admin">관리자</button>
+      <button class="who-btn" data-who="yuchan">김유찬</button>
+      <button class="who-btn" data-who="seungwoo">한승우</button>
+    </div>
+    <div class="login-field">
+      <label class="label" for="pw-input">비밀번호</label>
+      <input class="input" id="pw-input" type="password" placeholder="비밀번호 입력" autocomplete="current-password">
+    </div>
+    <button class="btn btn-red btn-full" id="login-btn">로그인</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     ADMIN
+═══════════════════════════════════════════════════════ -->
+<div id="v-admin" class="view hidden">
+  <nav class="admin-sidebar">
+    <div class="sidebar-brand">G복싱<span>관리자</span></div>
+    <nav class="sidebar-nav" id="admin-nav">
+      <div class="nav-section">대시보드</div>
+      <a href="#" data-sv="a-dashboard" class="active">홈</a>
+      <div class="nav-section">코치</div>
+      <a href="#" data-sv="a-yuchan">김유찬</a>
+      <a href="#" data-sv="a-seungwoo">한승우</a>
+      <div class="nav-section">도구</div>
+      <a href="#" data-sv="a-chat">AI 채팅</a>
+      <a href="#" data-sv="a-settings">설정</a>
+    </nav>
+    <div class="sidebar-logout">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="logout()">로그아웃</button>
+    </div>
+  </nav>
+
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <section class="subview active" id="a-dashboard">
+      <div class="page-header">
+        <div class="page-title">재활 현황</div>
+        <div class="page-desc" id="admin-date-str"></div>
+      </div>
+      <div class="user-cards" id="admin-user-cards">
+        <!-- JS-rendered -->
+      </div>
+      <div class="section-title">오늘의 기록 현황</div>
+      <div class="card" id="admin-today-records">
+        <span class="text-muted text-sm">로딩 중…</span>
+      </div>
+    </section>
+
+    <!-- YUCHAN DETAIL -->
+    <section class="subview" id="a-yuchan">
+      <div class="page-header flex justify-between items-center">
+        <div>
+          <div class="page-title">김유찬 코치님</div>
+          <div class="page-desc">운동일: 월 · 수 · 금 · 토</div>
+        </div>
+      </div>
+      <div class="flex gap-8" style="margin-bottom:16px">
+        <button class="btn btn-ghost btn-sm btn-red" data-tab="week" onclick="adminTab('yuchan','week',this)">이번 주</button>
+        <button class="btn btn-ghost btn-sm" data-tab="records" onclick="adminTab('yuchan','records',this)">기록</button>
+      </div>
+      <div id="yuchan-tab-week">
+        <div class="section-title">이번 주 현황</div>
+        <div id="week-yuchan"></div>
+      </div>
+      <div id="yuchan-tab-records" class="hidden">
+        <div class="section-title">기록 내역</div>
+        <div class="card" style="overflow-x:auto"><table class="records-table" id="tbl-yuchan"></table></div>
+      </div>
+    </section>
+
+    <!-- SEUNGWOO DETAIL -->
+    <section class="subview" id="a-seungwoo">
+      <div class="page-header flex justify-between items-center">
+        <div>
+          <div class="page-title">한승우 코치님</div>
+          <div class="page-desc">운동일: 월 · 수 · 금 · 토</div>
+        </div>
+      </div>
+      <div class="flex gap-8" style="margin-bottom:16px">
+        <button class="btn btn-ghost btn-sm btn-red" data-tab="week" onclick="adminTab('seungwoo','week',this)">이번 주</button>
+        <button class="btn btn-ghost btn-sm" data-tab="records" onclick="adminTab('seungwoo','records',this)">기록</button>
+      </div>
+      <div id="seungwoo-tab-week">
+        <div class="section-title">이번 주 현황</div>
+        <div id="week-seungwoo"></div>
+      </div>
+      <div id="seungwoo-tab-records" class="hidden">
+        <div class="section-title">기록 내역</div>
+        <div class="card" style="overflow-x:auto"><table class="records-table" id="tbl-seungwoo"></table></div>
+      </div>
+    </section>
+
+    <!-- AI CHAT -->
+    <section class="subview" id="a-chat">
+      <div class="page-header">
+        <div class="page-title">AI 채팅</div>
+        <div class="page-desc">운동 프로그램 상담 · 수정 제안</div>
+      </div>
+      <div class="chat-config">
+        <div>
+          <div class="label">AI 제공자</div>
+          <select class="input" id="ai-provider" style="width:auto;padding:8px 12px">
+            <option value="openai">ChatGPT (OpenAI)</option>
+            <option value="claude">Claude (Anthropic)</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <div class="label" id="api-key-label">OpenAI API Key</div>
+          <div class="api-key-row">
+            <input class="input" id="ai-api-key" type="password" placeholder="sk-…">
+            <button class="btn btn-ghost btn-sm" onclick="saveApiKey()">저장</button>
+          </div>
+        </div>
+        <div>
+          <div class="label">코치 컨텍스트</div>
+          <select class="input" id="chat-context" style="width:auto;padding:8px 12px">
+            <option value="both">전체</option>
+            <option value="yuchan">김유찬</option>
+            <option value="seungwoo">한승우</option>
+          </select>
+        </div>
+      </div>
+      <div class="chat-layout" style="height:calc(100vh - 280px)">
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg msg-system">AI에게 운동 프로그램에 대해 질문하거나 수정을 요청하세요.<br>예: "김유찬 코치님 운동 강도 높이는 방법?" / "한승우 코치님 고관절 가동성 좋아지는 스트레칭 추가해줘"<br><br>Anthropic API는 브라우저에서 CORS 오류가 날 수 있습니다. 오류 발생 시 ChatGPT(OpenAI)를 추천합니다.</div>
+        </div>
+        <div>
+          <div id="admin-attach-preview" class="attach-preview"></div>
+          <div class="chat-input-row">
+            <label class="attach-btn" title="사진/영상 첨부">
+              <input type="file" id="admin-file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleAttach(this,'admin')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </label>
+            <textarea class="input" id="chat-input" placeholder="메시지 입력… (사진/영상 첨부 가능)" rows="2"></textarea>
+            <button class="btn btn-red" id="chat-send-btn" onclick="sendChat()" style="align-self:flex-end">전송</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="subview" id="a-settings">
+      <div class="page-header">
+        <div class="page-title">설정</div>
+      </div>
+      <div class="settings-section">
+        <h3>Google Sheets 연동</h3>
+        <div class="settings-row">
+          <label class="label">Apps Script 웹앱 URL</label>
+          <div class="api-key-row">
+            <input class="input" id="sheets-url" placeholder="https://script.google.com/macros/s/…/exec">
+            <button class="btn btn-ghost btn-sm" onclick="saveSettings()">저장</button>
+          </div>
+          <div class="settings-desc">
+            Google Apps Script를 만들어 POST 요청을 받는 웹앱으로 배포하세요.<br>
+            코드: <code style="background:var(--elevated);padding:2px 6px;border-radius:4px;font-size:11px">doPost(e) → SpreadsheetApp.openById(…).appendRow(…)</code>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>비밀번호 변경</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="settings-row">
+            <label class="label">김유찬 비밀번호</label>
+            <div class="api-key-row">
+              <input class="input" id="pw-yuchan" type="password" placeholder="새 비밀번호">
+              <button class="btn btn-ghost btn-sm" onclick="savePw('yuchan')">저장</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label class="label">한승우 비밀번호</label>
+            <div class="api-key-row">
+              <input class="input" id="pw-seungwoo" type="password" placeholder="새 비밀번호">
+              <button class="btn btn-ghost btn-sm" onclick="savePw('seungwoo')">저장</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-desc">관리자 비밀번호는 소스코드에서 변경 가능합니다.</div>
+      </div>
+      <div class="settings-section">
+        <h3>코치 프로필 / 병력 정보</h3>
+        <div class="settings-desc" style="margin-bottom:14px">과거 병력, 수술 이력, 신체 정보, 주의사항 등 — AI 채팅에 항상 자동으로 포함됩니다.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="settings-row">
+            <label class="label">김유찬 코치님</label>
+            <textarea class="input" id="profile-yuchan" rows="7"
+              placeholder="예) 나이: 28세&#10;진단: 요추 4-5번 협착증&#10;수술 이력: 없음&#10;주의: 전방 굴곡 제한&#10;..."></textarea>
+            <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="saveProfile('yuchan')">저장</button>
+          </div>
+          <div class="settings-row">
+            <label class="label">한승우 코치님</label>
+            <textarea class="input" id="profile-seungwoo" rows="7"
+              placeholder="예) 나이: 32세&#10;진단: 고관절 충돌 증후군&#10;수술 이력: 없음&#10;주의: 깊은 스쿼트 금지&#10;..."></textarea>
+            <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="saveProfile('seungwoo')">저장</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>재활 참고자료</h3>
+        <div class="settings-desc" style="margin-bottom:14px">재활 프로토콜, 치료 원칙, 주요 지침 등 — AI 채팅 시 항상 자동으로 참고합니다.</div>
+        <textarea class="input" id="rehab-ref-text" rows="8"
+          placeholder="예)&#10;## 재활 원칙&#10;- 통증 없는 범위 내에서만 운동&#10;- 염증기(초기 2주): 스트레칭 위주, 근력 운동 최소화&#10;- 아급성기: 점진적 부하 증가&#10;&#10;## 협착증 주의사항&#10;- 신전 동작 선호, 굴곡 제한&#10;- 코어 안정화 우선&#10;&#10;## 고관절 충돌 주의사항&#10;- 깊은 스쿼트, 극단적 굴곡 금지"></textarea>
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="saveRehabRef()">저장</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     USER
+═══════════════════════════════════════════════════════ -->
+<div id="v-user" class="view hidden">
+  <header class="user-header">
+    <div>
+      <div class="user-header-name" id="u-name"></div>
+      <div class="user-header-cond" id="u-cond"></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">로그아웃</button>
+  </header>
+
+  <div class="user-content">
+
+    <!-- HOME -->
+    <div class="user-subview active" id="u-home">
+      <div class="countdown-block">
+        <div id="cd-number"></div>
+        <div class="countdown-label" id="cd-label"></div>
+        <div class="countdown-date" id="cd-date"></div>
+      </div>
+      <div class="section-title" id="today-title">오늘의 운동</div>
+      <div id="today-exercises"></div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="user-subview" id="u-schedule">
+      <div class="page-header">
+        <div class="page-title bebas" style="font-size:26px">운동 스케쥴</div>
+        <div class="page-desc text-sm">운동일: 월 · 수 · 금 · 토 &nbsp;|&nbsp; 매회 동일 루틴</div>
+      </div>
+      <div id="u-sched-list"></div>
+    </div>
+
+    <!-- LOG -->
+    <div class="user-subview" id="u-log">
+      <div class="page-header">
+        <div class="page-title bebas" style="font-size:26px">오늘 기록</div>
+        <div class="page-desc text-sm" id="u-log-date"></div>
+      </div>
+      <div class="log-section">
+        <div class="label">수면 시간</div>
+        <div class="sleep-row">
+          <button class="sleep-btn" onclick="adjSleep(-0.5)">−</button>
+          <div class="sleep-val" id="sleep-val">7.0</div>
+          <span class="text-muted" style="font-size:13px">시간</span>
+          <button class="sleep-btn" onclick="adjSleep(0.5)">+</button>
+        </div>
+      </div>
+      <div class="log-section">
+        <label class="label" for="log-food">식사 내용</label>
+        <textarea class="input" id="log-food" placeholder="아침 / 점심 / 저녁 간단하게"></textarea>
+      </div>
+      <div class="log-section">
+        <label class="label" for="log-exercise">오늘 한 운동</label>
+        <textarea class="input" id="log-exercise" placeholder="체크한 운동이 자동으로 채워집니다"></textarea>
+      </div>
+      <div class="log-section">
+        <label class="label" for="log-notes">특이사항</label>
+        <textarea class="input" id="log-notes" placeholder="통증 변화, 컨디션, 주의사항 등"></textarea>
+      </div>
+      <div class="log-section">
+        <div class="label">아침 통증 (0=없음, 10=심함)</div>
+        <div class="pain-scale" id="pain-morning"></div>
+      </div>
+      <div class="log-section">
+        <div class="label">저녁 통증</div>
+        <div class="pain-scale" id="pain-evening"></div>
+      </div>
+      <button class="btn btn-red btn-full" style="margin-top:8px" onclick="submitLog()" id="log-submit-btn">기록 전송하기</button>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted);text-align:center" id="log-status"></div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="user-subview" id="u-history">
+      <div class="page-header">
+        <div class="page-title bebas" style="font-size:26px">기록 히스토리</div>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- MY INFO -->
+    <div class="user-subview" id="u-myinfo">
+      <div class="page-header">
+        <div class="page-title bebas" style="font-size:26px">내 정보</div>
+        <div class="page-desc text-sm">입력한 정보는 AI 상담에 자동으로 활용됩니다</div>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="section-title">기저질환 · 부상 이력 · 신체 정보</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+          현재 진단명, 과거 수술/부상 이력, 통증 부위, 주의해야 할 동작 등을 적어주세요.<br>
+          AI가 운동 조언 시 자동으로 참고합니다.
+        </div>
+        <textarea class="input" id="myinfo-text" rows="10"
+          placeholder="예)&#10;나이: 28세&#10;진단: 요추 4-5번 협착증&#10;수술 이력: 없음&#10;주요 증상: 앉아있다 일어날 때 허리 통증&#10;주의 동작: 전방 굴곡 제한, 무거운 스쿼트 금지&#10;기타: 고혈압약 복용 중"></textarea>
+        <button class="btn btn-red btn-full" style="margin-top:12px" onclick="saveMyInfo()">저장</button>
+      </div>
+      <div class="card" style="background:var(--elevated);border-color:var(--faint)">
+        <div style="font-size:12px;color:var(--muted);line-height:1.6">
+          💡 저장된 정보는 관리자와 AI만 볼 수 있으며,<br>운동 프로그램 개선에 활용됩니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- AI CHAT -->
+    <div class="user-subview" id="u-chat">
+      <div class="page-header">
+        <div class="page-title bebas" style="font-size:26px">AI 상담</div>
+        <div class="page-desc text-sm">재활 운동 질문 · 통증 관리 조언</div>
+      </div>
+      <div class="coach-chat-wrap">
+        <div class="coach-chat-msgs" id="coach-chat-messages">
+          <div class="msg msg-system">운동, 재활에 대해 질문하세요.<br>예: "오늘 버드독 할 때 허리가 당기는데 어떻게 해야 하나요?"</div>
+        </div>
+        <div>
+          <div id="coach-attach-preview" class="attach-preview"></div>
+          <div class="coach-chat-row">
+            <label class="attach-btn" title="사진/영상 첨부">
+              <input type="file" id="coach-file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleAttach(this,'coach')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </label>
+            <textarea class="input" id="coach-chat-input" placeholder="메시지 입력… (사진/영상 첨부 가능)" rows="2"></textarea>
+            <button class="btn btn-red" id="coach-send-btn" onclick="sendCoachChat()" style="align-self:flex-end">전송</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <nav class="user-nav" id="user-nav">
+    <button class="user-nav-btn active" data-uv="u-home" onclick="userNav(this)">홈</button>
+    <button class="user-nav-btn" data-uv="u-schedule" onclick="userNav(this)">스케쥴</button>
+    <button class="user-nav-btn" data-uv="u-log" onclick="userNav(this)">기록</button>
+    <button class="user-nav-btn" data-uv="u-history" onclick="userNav(this)">히스토리</button>
+    <button class="user-nav-btn" data-uv="u-myinfo" onclick="userNav(this)">내 정보</button>
+    <button class="user-nav-btn" data-uv="u-chat" onclick="userNav(this)">AI</button>
+  </nav>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   CONSTANTS & DEFAULTS
+═══════════════════════════════════════════════════════ */
+const START_DATE = '2026-09-11';
+const TOTAL_DAYS = 31;
+
+const USERS = {
+  admin:    { name:'관리자', pw:'admin1234' },
+  yuchan:   { name:'김유찬', days:['mon','wed','fri','sat'] },
+  seungwoo: { name:'한승우', days:['mon','wed','fri','sat'] }
+};
+
+const DEFAULT_SCHEDULES = {
+  yuchan: [
+    {id:'y1',cat:'스트레칭',name:'복와위 팔꿈치 지지 (Prone on Elbows)',sets:'3분 유지',note:'통증 없이 편한 자세, 허리 힘 빼기'},
+    {id:'y2',cat:'스트레칭',name:'맥켄지 신전 (McKenzie Extension)',sets:'10회 × 3세트',note:'팔로만 밀고 허리 근육 사용 최소화'},
+    {id:'y3',cat:'스트레칭',name:'무릎-가슴 스트레칭 (Knee to Chest)',sets:'30초 × 각 3회',note:'굴곡 가능한 범위 내에서만, 무리 금지'},
+    {id:'y4',cat:'스트레칭',name:'장요근 스트레칭 (Hip Flexor Lunge)',sets:'45초 × 각 3회',note:'전방 허벅지 앞쪽 당기는 느낌'},
+    {id:'y5',cat:'근력',name:'버드독 (Bird Dog)',sets:'10회(각측) × 3세트',note:'척추 중립 유지, 허리 회전 절대 금지'},
+    {id:'y6',cat:'근력',name:'사이드 플랭크 (Side Plank)',sets:'20초 × 3세트 (양측)',note:'무릎 굽혀서 시작 가능, 골반 처지지 않게'},
+    {id:'y7',cat:'근력',name:'클램쉘 (Clamshell)',sets:'15회 × 3세트 (양측)',note:'골반 뒤로 굴리지 말고 고관절만 열기'},
+    {id:'y8',cat:'근력',name:'힙 힌지 연습 (Hip Hinge)',sets:'15회 × 3세트',note:'막대기 등에 대고 연습, 허리 구부리지 않기'}
+  ],
+  seungwoo: [
+    {id:'s1',cat:'스트레칭',name:'장요근 스트레칭 (Kneeling Hip Flexor)',sets:'45초 × 각 3회',note:'골반 전방 경사 없이, 복부 살짝 당기기'},
+    {id:'s2',cat:'스트레칭',name:'이상근 스트레칭 (Figure-4 / 비둘기 자세)',sets:'30초 × 각 3회',note:'누워서 4자 만들기, 엉덩이 깊은 곳 늘리기'},
+    {id:'s3',cat:'스트레칭',name:'햄스트링 스트레칭',sets:'30초 × 각 3회',note:'허리 말리지 말고 골반부터 앞으로'},
+    {id:'s4',cat:'스트레칭',name:'흉추 회전 (Thoracic Rotation)',sets:'10회 × 3세트 (양측)',note:'누워서 무릎 세우고 돌리기, 허리는 최소'},
+    {id:'s5',cat:'근력',name:'글루트 브릿지 (Glute Bridge)',sets:'15회 × 3세트',note:'허리로 올리지 말고 엉덩이로, 상단 2초 유지'},
+    {id:'s6',cat:'근력',name:'데드버그 (Dead Bug)',sets:'10회 × 3세트',note:'허리 바닥에 붙이고 천천히, 허리 뜨면 멈추기'},
+    {id:'s7',cat:'근력',name:'사이드라잉 힙 어브덕션',sets:'15회 × 3세트 (양측)',note:'발끝 살짝 앞으로, 골반 흔들지 않기'},
+    {id:'s8',cat:'근력',name:'폼롤러 고관절 가동화',sets:'각 부위 2분',note:'TFL · 장경인대 · 둔근 롤링'}
+  ]
+};
+
+/* ════════════════════════════════════════════════════
+   WEEK HELPERS
+═══════════════════════════════════════════════════════ */
+const KOR_DAYS  = ['월','화','수','목','금','토','일'];
+const KOR_DAYS_FULL = ['월요일','화요일','수요일','목요일','금요일','토요일','일요일'];
+const DAY_KEY   = ['sun','mon','tue','wed','thu','fri','sat'];
+
+function getWeekDates() {
+  const today = new Date();
+  const dow = today.getDay();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((dow + 6) % 7));
+  return Array.from({length:7}, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d.toISOString().slice(0,10);
+  });
+}
+
+function getDoneListForDate(uid, date) {
+  return checks[`${uid}-${date}`] || [];
+}
+
+function painClass(v) { return v>=7?'text-red':v>=4?'text-amber':'text-green'; }
+function painWkClass(v) { return v>=7?'p-hi':v>=4?'p-mi':'p-lo'; }
+
+function buildRecentRecordsContext(uids) {
+  return uids.map(uid => {
+    const u = USERS[uid];
+    const recs = (records[uid]||[]).slice(0,7);
+    if (!recs.length) return `${u.name} 코치님: 최근 기록 없음`;
+    const lines = recs.map(r => {
+      const done = getDoneListForDate(uid, r.date);
+      return `  ${r.date}: 아침통증 ${r.painMorning}/10, 저녁통증 ${r.painEvening}/10, 수면 ${r.sleep}h, 운동완료 ${done.length}/${schedules[uid].length}개${r.notes?`, 메모: ${r.notes}`:''}`;
+    });
+    return `${u.name} 코치님 최근 기록:\n${lines.join('\n')}`;
+  }).join('\n\n');
+}
+
+/* ════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let db = null;
+let currentUser = null;
+let schedules = structuredClone(DEFAULT_SCHEDULES);
+let records = {};
+let checks = {};
+let chatHistory = [];
+let coachChatHistory = [];
+let adminSending = false;
+let coachSending = false;
+let profiles = { yuchan: '', seungwoo: '' }; // 코치 프로필/병력
+let rehabRef = ''; // 관리자 재활 참고자료
+let sleepVal = 7.0;
+let painMorning = 0;
+let painEvening = 0;
+
+/* passwords changeable via settings */
+let userPws = JSON.parse(localStorage.getItem('gb_pws') || '{"yuchan":"0000","seungwoo":"0000"}');
+
+/* ════════════════════════════════════════════════════
+   DB INIT
+═══════════════════════════════════════════════════════ */
+async function initDb() {
+  try {
+    db = await claude.use('db');
+    if (!db) return;
+    // Subscribe to schedule changes
+    db.doc('schedules/yuchan').onSnapshot(snap => {
+      if (snap.exists && snap.data().items) {
+        schedules.yuchan = snap.data().items;
+        if (currentUser === 'yuchan') renderUserSchedule();
+        if (currentUser === 'admin') renderAdminSched('yuchan');
+      }
+    }, () => {});
+    db.doc('schedules/seungwoo').onSnapshot(snap => {
+      if (snap.exists && snap.data().items) {
+        schedules.seungwoo = snap.data().items;
+        if (currentUser === 'seungwoo') renderUserSchedule();
+        if (currentUser === 'admin') renderAdminSched('seungwoo');
+      }
+    }, () => {});
+    // Load records
+    const today = todayStr();
+    ['yuchan','seungwoo'].forEach(uid => {
+      db.collection('records').where('user','==',uid).orderBy('date','desc').limit(30)
+        .onSnapshot(snap => {
+          records[uid] = snap.docs.map(d => ({id:d.id, ...d.data()}));
+          if (currentUser === 'admin') { renderAdminDashboard(); renderAdminRecords(uid); }
+          if (currentUser === uid) renderHistory();
+        }, () => {});
+    });
+    // Subscribe to checks for the entire current week (both users)
+    getWeekDates().forEach(dateStr => {
+      ['yuchan','seungwoo'].forEach(uid => {
+        db.doc(`checks/${uid}-${dateStr}`).onSnapshot(snap => {
+          checks[`${uid}-${dateStr}`] = snap.exists ? (snap.data().done || []) : [];
+          if (currentUser === 'admin') renderAdminDashboard();
+          if (currentUser === uid && dateStr === today) renderTodayExercises();
+        }, () => {});
+      });
+    });
+    // Subscribe to profiles
+    ['yuchan','seungwoo'].forEach(uid => {
+      db.doc(`profiles/${uid}`).onSnapshot(snap => {
+        if (snap.exists) {
+          profiles[uid] = snap.data().text || '';
+          // If coach is viewing their own info tab, refresh it
+          if (currentUser === uid) {
+            const el = document.getElementById('myinfo-text');
+            if (el) el.value = profiles[uid];
+          }
+          // If admin has settings open, refresh admin profile textarea
+          const adminEl = document.getElementById(`profile-${uid}`);
+          if (adminEl) adminEl.value = profiles[uid];
+        }
+      }, () => {});
+    });
+    // Subscribe to rehab reference material
+    db.doc('settings/rehabRef').onSnapshot(snap => {
+      if (snap.exists) {
+        rehabRef = snap.data().text || '';
+        const el = document.getElementById('rehab-ref-text');
+        if (el) el.value = rehabRef;
+      }
+    }, () => {});
+    // Seed schedules if not exist
+    const ysSnap = await db.doc('schedules/yuchan').get();
+    if (!ysSnap.exists) await db.doc('schedules/yuchan').set({items: schedules.yuchan});
+    const ssSnap = await db.doc('schedules/seungwoo').get();
+    if (!ssSnap.exists) await db.doc('schedules/seungwoo').set({items: schedules.seungwoo});
+    // Load profiles from DB
+    const ypSnap = await db.doc('profiles/yuchan').get();
+    if (ypSnap.exists) profiles.yuchan = ypSnap.data().text || '';
+    const spSnap = await db.doc('profiles/seungwoo').get();
+    if (spSnap.exists) profiles.seungwoo = spSnap.data().text || '';
+    // Load rehab reference material
+    const rrSnap = await db.doc('settings/rehabRef').get();
+    if (rrSnap.exists) rehabRef = rrSnap.data().text || '';
+  } catch(e) { console.warn('DB unavailable, using localStorage', e); }
+  // localStorage fallback for profiles
+  if (!profiles.yuchan) profiles.yuchan = lsGet('gb_profile_yuchan', '');
+  if (!profiles.seungwoo) profiles.seungwoo = lsGet('gb_profile_seungwoo', '');
+  if (!rehabRef) rehabRef = lsGet('gb_rehab_ref', '');
+}
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function formatDate(d) {
+  const [y,m,day] = d.split('-');
+  return `${m}월 ${day}일`;
+}
+
+function getDayRemaining() {
+  const start = new Date(START_DATE);
+  const today = new Date(todayStr());
+  const diff = Math.floor((today - start) / 86400000);
+  if (diff < 0) return {type:'pre', days: -diff};
+  if (diff >= TOTAL_DAYS) return {type:'done'};
+  return {type:'active', d: TOTAL_DAYS - diff};
+}
+
+function isTodayExerciseDay(uid) {
+  const dayName = DAY_KEY[new Date().getDay()];
+  return USERS[uid]?.days?.includes(dayName);
+}
+
+function getChecksKey(uid) { return `${uid}-${todayStr()}`; }
+function getDoneList(uid) { return checks[getChecksKey(uid)] || []; }
+
+function lsGet(k, def) { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch{ return def; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch{} }
+
+/* ════════════════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════════════════ */
+let selectedWho = 'admin';
+document.querySelectorAll('.who-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    selectedWho = b.dataset.who;
+    document.querySelectorAll('.who-btn').forEach(x => x.classList.toggle('selected', x === b));
+  });
+});
+// pre-select admin
+document.querySelector('[data-who="admin"]').classList.add('selected');
+
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-btn').click();
+});
+
+document.getElementById('login-btn').addEventListener('click', () => {
+  const pw = document.getElementById('pw-input').value;
+  doLogin(selectedWho, pw);
+});
+
+
+function doLogin(who, pw) {
+  const err = document.getElementById('login-error');
+  let valid = false;
+  if (who === 'admin' && pw === USERS.admin.pw) valid = true;
+  if (who === 'yuchan' && pw === userPws.yuchan) valid = true;
+  if (who === 'seungwoo' && pw === userPws.seungwoo) valid = true;
+  if (!valid) { err.textContent = '비밀번호가 틀렸습니다'; return; }
+  err.textContent = '';
+  currentUser = who;
+  showView(who === 'admin' ? 'admin' : 'user');
+  if (who === 'admin') initAdmin();
+  else initUser(who);
+}
+
+function logout() {
+  currentUser = null;
+  document.getElementById('pw-input').value = '';
+  document.getElementById('login-error').textContent = '';
+  showView('login');
+}
+
+/* ════════════════════════════════════════════════════
+   VIEW ROUTING
+═══════════════════════════════════════════════════════ */
+function showView(v) {
+  document.getElementById('v-login').classList.toggle('hidden', v !== 'login');
+  document.getElementById('v-admin').classList.toggle('hidden', v !== 'admin');
+  document.getElementById('v-user').classList.toggle('hidden', v !== 'user');
+}
+
+/* ════════════════════════════════════════════════════
+   ADMIN INIT
+═══════════════════════════════════════════════════════ */
+function initAdmin() {
+  const d = new Date();
+  document.getElementById('admin-date-str').textContent =
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 · ${['일','월','화','수','목','금','토'][d.getDay()]}요일`;
+  renderAdminDashboard();
+  renderAdminSched('yuchan');
+  renderAdminSched('seungwoo');
+  // Load API key
+  const prov = lsGet('gb_ai_provider', 'openai');
+  document.getElementById('ai-provider').value = prov;
+  document.getElementById('ai-api-key').value = lsGet('gb_ai_key_'+prov, '');
+  document.getElementById('api-key-label').textContent = prov === 'openai' ? 'OpenAI API Key' : 'Anthropic API Key';
+  document.getElementById('ai-provider').addEventListener('change', e => {
+    const p = e.target.value;
+    lsSet('gb_ai_provider', p);
+    document.getElementById('ai-api-key').value = lsGet('gb_ai_key_'+p, '');
+    document.getElementById('api-key-label').textContent = p === 'openai' ? 'OpenAI API Key' : 'Anthropic API Key';
+  });
+  // Load settings
+  document.getElementById('sheets-url').value = lsGet('gb_sheets_url', '');
+  // Admin nav
+  document.getElementById('admin-nav').querySelectorAll('a[data-sv]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelectorAll('#admin-nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      document.querySelectorAll('.subview').forEach(s => s.classList.remove('active'));
+      document.getElementById(a.dataset.sv).classList.add('active');
+      if (a.dataset.sv === 'a-yuchan') renderCoachWeek('yuchan');
+      if (a.dataset.sv === 'a-seungwoo') renderCoachWeek('seungwoo');
+      if (a.dataset.sv === 'a-settings') loadProfileUI();
+    });
+  });
+}
+
+function renderAdminDashboard() {
+  const week = getWeekDates();
+  const today = todayStr();
+  const container = document.getElementById('admin-user-cards');
+
+  container.innerHTML = ['yuchan','seungwoo'].map(uid => {
+    const u = USERS[uid];
+    const todayRec = (records[uid]||[]).find(r => r.date === today);
+
+    // Build 7-day mini grid
+    const gridCells = week.map((date, i) => {
+      const dayKey = DAY_KEY[new Date(date + 'T12:00:00').getDay()];
+      const isEx  = USERS[uid].days.includes(dayKey);
+      const isToday = date === today;
+      const isFuture = date > today;
+      const rec  = (records[uid]||[]).find(r => r.date === date);
+      const done = getDoneListForDate(uid, date);
+      const total = schedules[uid].length;
+      const [,m,d] = date.split('-');
+
+      let badgeHtml;
+      if (isEx) {
+        if (isFuture) {
+          badgeHtml = `<span class="wk-rest">예정</span>`;
+        } else if (done.length > 0) {
+          badgeHtml = `<span class="wk-badge wk-done">${done.length}/${total}</span>`;
+        } else {
+          badgeHtml = `<span class="wk-badge wk-miss">미완료</span>`;
+        }
+      } else {
+        badgeHtml = `<span class="wk-rest">휴식</span>`;
+      }
+
+      let painHtml = '';
+      if (rec) {
+        const pm = rec.painMorning||0, pe = rec.painEvening||0;
+        painHtml = `<div class="wk-pain">아<span class="${painWkClass(pm)}">${pm}</span> 저<span class="${painWkClass(pe)}">${pe}</span></div>`;
+      } else if (!isFuture) {
+        painHtml = `<div class="wk-empty">-</div>`;
+      }
+
+      return `<div class="week-cell${isToday?' is-today':''}${isEx&&!isFuture?' is-ex':''}">
+        <div class="wk-name">${KOR_DAYS[i]}</div>
+        <div class="wk-date">${m}/${d}</div>
+        ${badgeHtml}
+        ${painHtml}
+      </div>`;
+    }).join('');
+
+    // Today summary
+    const todayDone = getDoneListForDate(uid, today).length;
+    const totalEx = schedules[uid].length;
+    const pct = totalEx ? Math.round(todayDone/totalEx*100) : 0;
+    const summaryHtml = todayRec
+      ? `<div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+          <div class="section-title" style="margin-bottom:6px">오늘 기록</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:12px">
+            <div><span class="text-muted">수면 </span><strong>${todayRec.sleep}h</strong></div>
+            <div><span class="text-muted">아침 </span><strong class="${painClass(todayRec.painMorning)}">${todayRec.painMorning}</strong></div>
+            <div><span class="text-muted">저녁 </span><strong class="${painClass(todayRec.painEvening)}">${todayRec.painEvening}</strong></div>
+          </div>
+          <div class="progress-bar" style="margin-top:8px" title="오늘 운동 ${todayDone}/${totalEx}">
+            <div class="progress-fill" style="width:${pct}%"></div>
+          </div>
+          <div style="font-size:10px;color:var(--muted);margin-top:4px">운동 완료 ${todayDone}/${totalEx}개</div>
+          ${todayRec.notes?`<div style="font-size:11px;color:var(--muted);margin-top:5px;font-style:italic">${todayRec.notes}</div>`:''}
+        </div>`
+      : `<div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px;font-size:11px;color:var(--faint);text-align:center">오늘 기록 미제출</div>`;
+
+    return `<div class="user-card">
+      <div class="flex items-center justify-between" style="margin-bottom:10px">
+        <div class="user-card-name">${u.name} 코치님</div>
+        <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:4px 10px" onclick="adminGoUser('${uid}')">상세보기</button>
+      </div>
+      <div class="week-grid">${gridCells}</div>
+      ${summaryHtml}
+    </div>`;
+  }).join('');
+}
+
+function adminGoUser(uid) {
+  const sv = uid === 'yuchan' ? 'a-yuchan' : 'a-seungwoo';
+  document.querySelectorAll('#admin-nav a').forEach(x => x.classList.remove('active'));
+  document.querySelector(`[data-sv="${sv}"]`).classList.add('active');
+  document.querySelectorAll('.subview').forEach(s => s.classList.remove('active'));
+  document.getElementById(sv).classList.add('active');
+}
+
+/* ─── Schedule rendering ─── */
+function renderAdminSched(uid) {
+  const grid = document.getElementById(`sched-${uid}`);
+  if (!grid) return;
+  grid.innerHTML = schedules[uid].map(ex => `
+    <div class="sched-item" data-id="${ex.id}">
+      <span class="sched-drag">⠿</span>
+      <div class="sched-info">
+        <span class="sched-cat tag ${ex.cat==='스트레칭'?'tag-stretch-ex':'tag-power'}">${ex.cat}</span>
+        <div class="sched-name">${ex.name}</div>
+        <div class="sched-meta">${ex.sets}${ex.note?` · <em style="color:var(--faint)">${ex.note}</em>`:''}</div>
+      </div>
+      <button class="sched-del" title="삭제" onclick="deleteEx('${uid}','${ex.id}')">×</button>
+    </div>`).join('');
+}
+
+function adminTab(uid, tab, btn) {
+  const tabs = btn.closest('.flex').querySelectorAll('.btn');
+  tabs.forEach(b => b.classList.remove('btn-red'));
+  btn.classList.add('btn-red');
+  const weekEl  = document.getElementById(`${uid}-tab-week`);
+  const recsEl  = document.getElementById(`${uid}-tab-records`);
+  weekEl.classList.add('hidden');
+  recsEl.classList.add('hidden');
+  if (tab === 'week') { weekEl.classList.remove('hidden'); renderCoachWeek(uid); }
+  else { recsEl.classList.remove('hidden'); renderAdminRecords(uid); }
+}
+
+function loadRecordsTab(uid) {}
+
+function renderCoachWeek(uid) {
+  const container = document.getElementById(`week-${uid}`);
+  if (!container) return;
+  const week  = getWeekDates();
+  const today = todayStr();
+
+  container.innerHTML = week.map((date, i) => {
+    const dayKey   = DAY_KEY[new Date(date + 'T12:00:00').getDay()];
+    const isEx     = USERS[uid].days.includes(dayKey);
+    const isToday  = date === today;
+    const isFuture = date > today;
+    const rec      = (records[uid]||[]).find(r => r.date === date);
+    const done     = getDoneListForDate(uid, date);
+    const [,m,d]   = date.split('-');
+
+    let painHtml = '';
+    if (rec) {
+      const pm = rec.painMorning||0, pe = rec.painEvening||0;
+      painHtml = `<div class="wdd-pain-row">
+        <div class="wdd-pain-item"><span class="wdd-pain-label">아침 통증</span>&nbsp;<strong class="${painClass(pm)}">${pm}/10</strong></div>
+        <div class="wdd-pain-item"><span class="wdd-pain-label">저녁 통증</span>&nbsp;<strong class="${painClass(pe)}">${pe}/10</strong></div>
+        <div class="wdd-pain-item"><span class="wdd-pain-label">수면</span>&nbsp;<strong>${rec.sleep}h</strong></div>
+      </div>`;
+      if (rec.notes) painHtml += `<div style="font-size:11px;color:var(--muted);margin:-4px 0 8px;font-style:italic">${rec.notes}</div>`;
+    }
+
+    let exHtml = '';
+    if (isEx) {
+      const total = schedules[uid].length;
+      if (isFuture) {
+        exHtml = `<div style="font-size:11px;color:var(--muted);margin-bottom:6px">예정 (${total}개)</div>`;
+        exHtml += `<div class="wdd-exlist">${schedules[uid].map(ex => `
+          <div class="wdd-ex">
+            <div class="wdd-chk chk-pending"></div>
+            <div>
+              <div style="font-weight:500;font-size:12px">${ex.name} <span style="color:var(--faint);font-size:10px;margin-left:4px">${ex.sets}</span></div>
+              ${ex.note?`<div style="font-size:10px;color:var(--blue);margin-top:2px;line-height:1.4">★ ${ex.note}</div>`:''}
+            </div>
+          </div>`).join('')}</div>`;
+      } else {
+        const pct = total ? Math.round(done.length/total*100) : 0;
+        exHtml = `<div style="font-size:11px;margin-bottom:6px">
+          <span class="${done.length===total?'text-green':done.length>0?'text-amber':'text-muted'}">
+            완료 ${done.length}/${total}개 (${pct}%)
+          </span>
+        </div>
+        <div class="progress-bar" style="margin-bottom:8px">
+          <div class="progress-fill" style="width:${pct}%;background:${done.length===total?'var(--green)':'var(--amber)'}"></div>
+        </div>`;
+        exHtml += `<div class="wdd-exlist">${schedules[uid].map(ex => {
+          const isDone = done.includes(ex.id);
+          return `<div class="wdd-ex" style="align-items:flex-start;padding:6px 0">
+            <div class="wdd-chk ${isDone?'chk-done':'chk-pending'}" style="margin-top:2px;flex-shrink:0">
+              ${isDone?`<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
+            </div>
+            <div>
+              <div style="font-weight:500;font-size:12px;${isDone?'color:var(--green)':''}">${ex.name} <span style="color:var(--faint);font-size:10px;margin-left:4px;font-weight:400">${ex.sets}</span></div>
+              ${ex.note?`<div style="font-size:10px;color:var(--blue);margin-top:2px;line-height:1.4">★ ${ex.note}</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}</div>`;
+      }
+    } else if (!rec) {
+      exHtml = `<div style="font-size:12px;color:var(--faint)">기록 없음</div>`;
+    }
+
+    return `<div class="wdd-card${isToday?' is-today':''}${isEx?' is-ex-day':''}">
+      <div class="wdd-header">
+        <div>
+          <div class="wdd-title">${KOR_DAYS_FULL[i]}&ensp;<span style="font-size:12px;color:var(--muted);font-weight:400">${m}월 ${d}일</span>${isToday?`&ensp;<span style="font-size:11px;font-weight:700;color:var(--red)">오늘</span>`:''}</div>
+          <div class="wdd-sub">${isEx?'운동일':'휴식일'}</div>
+        </div>
+      </div>
+      ${painHtml}
+      ${exHtml}
+    </div>`;
+  }).join('');
+}
+
+function renderAdminRecords(uid) {
+  const tbl = document.getElementById(`tbl-${uid}`);
+  if (!tbl) return;
+  const recs = records[uid] || [];
+  if (!recs.length) { tbl.innerHTML = '<tr><td style="padding:16px;color:var(--muted)">기록 없음</td></tr>'; return; }
+  tbl.innerHTML = `<thead><tr>
+    <th>날짜</th><th>수면</th><th>아침</th><th>저녁</th><th>식사</th><th>운동</th><th>특이사항</th>
+  </tr></thead><tbody>${recs.slice(0,30).map(r => {
+    const pm = r.painMorning||0, pe = r.painEvening||0;
+    return `<tr>
+      <td>${formatDate(r.date)}</td>
+      <td>${r.sleep}h</td>
+      <td><span class="pain-pill ${pm>=7?'pain-high':pm>=4?'pain-mid':'pain-low'}">${pm}</span></td>
+      <td><span class="pain-pill ${pe>=7?'pain-high':pe>=4?'pain-mid':'pain-low'}">${pe}</span></td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.food||'-'}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.exercise||'-'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||'-'}</td>
+    </tr>`;
+  }).join('')}</tbody>`;
+}
+
+/* ─── Add exercise form ─── */
+function showAddEx(uid) {
+  const c = document.getElementById(`add-ex-${uid}`);
+  c.innerHTML = `<div class="add-ex-form">
+    <div class="section-title">새 운동 추가</div>
+    <div class="add-ex-grid">
+      <div><label class="label">카테고리</label>
+        <select class="input" id="new-cat-${uid}">
+          <option value="스트레칭">스트레칭</option>
+          <option value="근력">근력</option>
+        </select></div>
+      <div><label class="label">운동 이름</label>
+        <input class="input" id="new-name-${uid}" placeholder="예: 글루트 브릿지"></div>
+      <div><label class="label">횟수/시간</label>
+        <input class="input" id="new-sets-${uid}" placeholder="예: 15회 × 3세트"></div>
+      <div><label class="label">주의사항 (선택)</label>
+        <input class="input" id="new-note-${uid}" placeholder="코칭 포인트"></div>
+    </div>
+    <div class="flex gap-8">
+      <button class="btn btn-red btn-sm" onclick="addEx('${uid}')">추가</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-ex-${uid}').innerHTML=''">취소</button>
+    </div>
+  </div>`;
+}
+
+function addEx(uid) {
+  const name = document.getElementById(`new-name-${uid}`).value.trim();
+  if (!name) return;
+  const ex = {
+    id: `${uid[0]}${Date.now()}`,
+    cat: document.getElementById(`new-cat-${uid}`).value,
+    name,
+    sets: document.getElementById(`new-sets-${uid}`).value.trim(),
+    note: document.getElementById(`new-note-${uid}`).value.trim()
+  };
+  schedules[uid].push(ex);
+  saveSchedule(uid);
+  document.getElementById(`add-ex-${uid}`).innerHTML = '';
+  renderAdminSched(uid);
+}
+
+function deleteEx(uid, id) {
+  if (!confirm('이 운동을 삭제할까요?')) return;
+  schedules[uid] = schedules[uid].filter(e => e.id !== id);
+  saveSchedule(uid);
+  renderAdminSched(uid);
+}
+
+async function saveSchedule(uid) {
+  if (db) {
+    try { await db.doc(`schedules/${uid}`).set({items: schedules[uid]}); } catch(e) { console.warn(e); }
+  }
+  lsSet(`gb_sched_${uid}`, schedules[uid]);
+}
+
+/* ─── Settings ─── */
+function saveApiKey() {
+  const p = document.getElementById('ai-provider').value;
+  const k = document.getElementById('ai-api-key').value.trim();
+  lsSet('gb_ai_key_'+p, k);
+  lsSet('gb_ai_provider', p);
+  showToast('API 키 저장됨');
+}
+function saveSettings() {
+  lsSet('gb_sheets_url', document.getElementById('sheets-url').value.trim());
+  showToast('설정 저장됨');
+}
+function savePw(uid) {
+  const pw = document.getElementById(`pw-${uid}`).value;
+  if (!pw) return;
+  userPws[uid] = pw;
+  lsSet('gb_pws', userPws);
+  document.getElementById(`pw-${uid}`).value = '';
+  showToast('비밀번호 변경됨');
+}
+
+async function saveProfile(uid) {
+  const text = document.getElementById(`profile-${uid}`).value.trim();
+  profiles[uid] = text;
+  lsSet(`gb_profile_${uid}`, text);
+  if (db) {
+    try { await db.doc(`profiles/${uid}`).set({text, updatedAt: new Date().toISOString()}); } catch(e) {}
+  }
+  showToast(`${USERS[uid].name} 프로필 저장됨`);
+}
+
+function loadProfileUI() {
+  ['yuchan','seungwoo'].forEach(uid => {
+    const el = document.getElementById(`profile-${uid}`);
+    if (el) el.value = profiles[uid] || '';
+  });
+  const rr = document.getElementById('rehab-ref-text');
+  if (rr) rr.value = rehabRef || '';
+}
+
+// Coach self-input: save their own medical info
+async function saveMyInfo() {
+  const uid = currentUser;
+  if (!uid || uid === 'admin') return;
+  const text = document.getElementById('myinfo-text').value.trim();
+  profiles[uid] = text;
+  lsSet(`gb_profile_${uid}`, text);
+  if (db) {
+    try { await db.doc(`profiles/${uid}`).set({text, updatedAt: new Date().toISOString()}); } catch(e) {}
+  }
+  showToast('내 정보가 저장되었습니다');
+}
+
+function loadMyInfoUI() {
+  const uid = currentUser;
+  if (!uid || uid === 'admin') return;
+  const el = document.getElementById('myinfo-text');
+  if (el) el.value = profiles[uid] || '';
+}
+
+// Admin: save rehab reference material
+async function saveRehabRef() {
+  const text = document.getElementById('rehab-ref-text').value.trim();
+  rehabRef = text;
+  lsSet('gb_rehab_ref', text);
+  if (db) {
+    try { await db.doc('settings/rehabRef').set({text, updatedAt: new Date().toISOString()}); } catch(e) {}
+  }
+  showToast('재활 참고자료 저장됨');
+}
+
+function showScheduleApplyBtn(jsonStr, uid) {
+  // Only show in admin view
+  try {
+    const items = JSON.parse(jsonStr);
+    if (!Array.isArray(items)) return;
+    const msgContainer = document.getElementById('chat-messages');
+    const applyEl = document.createElement('div');
+    applyEl.className = 'msg msg-system';
+    applyEl.style.cssText = 'border:1px solid var(--blue);background:rgba(79,142,247,.08);margin-top:8px';
+    const targetLabel = uid ? USERS[uid].name : '코치 선택 필요';
+    applyEl.innerHTML = `
+      <div style="font-size:12px;color:var(--blue);margin-bottom:10px">
+        <strong>운동 스케쥴 감지됨</strong> — ${items.length}개 운동
+        ${!uid ? '<br><span style="color:var(--amber)">코치 컨텍스트를 한 명으로 선택 후 적용하세요.</span>' : ''}
+      </div>
+      <div style="font-size:12px;margin-bottom:12px;color:var(--muted)">
+        ${items.slice(0,4).map(e=>`• ${e.name} (${e.sets})`).join('<br>')}
+        ${items.length>4?`<br>... 외 ${items.length-4}개`:''}
+      </div>
+      ${uid ? `
+        <div class="flex gap-8">
+          <button class="btn btn-red btn-sm" onclick="applySchedule('${uid}', ${JSON.stringify(jsonStr).replace(/'/g,"\\'")})" style="flex:1">
+            ${USERS[uid].name} 스케쥴 적용
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="this.closest('.msg').remove()">취소</button>
+        </div>` : ''}`;
+    msgContainer.appendChild(applyEl);
+    msgContainer.scrollTop = msgContainer.scrollHeight;
+  } catch(e) { console.warn('Schedule parse error', e); }
+}
+
+async function applySchedule(uid, jsonStr) {
+  try {
+    const raw = JSON.parse(jsonStr);
+    // Assign IDs and cat default
+    const prefix = uid === 'yuchan' ? 'y' : 's';
+    const newItems = raw.map((e, i) => ({
+      id: `${prefix}gpt${Date.now()}_${i}`,
+      cat: e.cat || '근력',
+      name: e.name || '운동',
+      sets: e.sets || '',
+      note: e.note || ''
+    }));
+    schedules[uid] = newItems;
+    if (db) {
+      try { await db.doc(`schedules/${uid}`).set({items: newItems}); } catch(e) {}
+    }
+    lsSet(`gb_sched_${uid}`, newItems);
+    showToast(`${USERS[uid].name} 스케쥴 업데이트 완료 (${newItems.length}개 운동)`);
+    // Remove apply card
+    document.querySelectorAll('#chat-messages .msg-system').forEach(el => {
+      if (el.textContent.includes('운동 스케쥴 감지됨')) el.remove();
+    });
+    appendChatMsg('system', `✓ ${USERS[uid].name} 코치님 스케쥴이 업데이트되었습니다. (${newItems.length}개 운동)`);
+  } catch(e) { showToast('스케쥴 적용 실패: ' + e.message); }
+}
+
+/* ════════════════════════════════════════════════════
+   USER INIT
+═══════════════════════════════════════════════════════ */
+function initUser(uid) {
+  const u = USERS[uid];
+  document.getElementById('u-name').textContent = u.name + ' 코치님';
+  document.getElementById('u-cond').textContent = '';
+  // Load local checks if no db
+  if (!db) {
+    const k = getChecksKey(uid);
+    checks[k] = lsGet('gb_checks_'+k, []);
+    const allRecs = lsGet('gb_records_'+uid, []);
+    records[uid] = allRecs;
+  }
+  coachChatHistory = []; // reset chat on new login
+  renderCountdown();
+  renderTodayExercises();
+  renderUserSchedule();
+  renderHistory();
+  initLogForm(uid);
+  initCoachChat();
+}
+
+function renderCountdown() {
+  const cd = getDayRemaining();
+  const cdNum = document.getElementById('cd-number');
+  const cdLabel = document.getElementById('cd-label');
+  const cdDate = document.getElementById('cd-date');
+  if (cd.type === 'pre') {
+    cdNum.innerHTML = `<div class="countdown-pre">D-${cd.days}</div>`;
+    cdLabel.textContent = '시작까지 남은 날';
+    cdDate.textContent = `프로그램 시작: ${formatDate(START_DATE)}`;
+  } else if (cd.type === 'done') {
+    cdNum.innerHTML = `<div class="countdown-done">완료</div>`;
+    cdLabel.textContent = '31일 재활 프로그램 완료!';
+    cdDate.textContent = '';
+  } else {
+    cdNum.innerHTML = `<div class="countdown-d">D-${String(cd.d).padStart(2,'0')}</div>`;
+    cdLabel.textContent = `재활 ${TOTAL_DAYS-cd.d+1}일차 · ${cd.d}일 남음`;
+    cdDate.textContent = `${formatDate(todayStr())} · 목표 완주: ${formatDate('2026-10-11')}`;
+  }
+}
+
+function renderTodayExercises() {
+  const uid = currentUser;
+  const container = document.getElementById('today-exercises');
+  const titleEl = document.getElementById('today-title');
+  if (!isTodayExerciseDay(uid)) {
+    const nDays = {yuchan:'월 · 수 · 금 · 토', seungwoo:'월 · 수 · 금 · 토'};
+    titleEl.textContent = '오늘의 운동';
+    container.innerHTML = `<div class="rest-day">
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">오늘은 휴식일입니다</div>
+      <div style="font-size:13px">운동일: ${nDays[uid]}요일</div>
+    </div>`;
+    return;
+  }
+  titleEl.textContent = '오늘의 운동';
+  const done = getDoneList(uid);
+  const items = schedules[uid];
+  container.innerHTML = items.map(ex =>
+    renderExItem(ex, done.includes(ex.id), uid)
+  ).join('');
+  container.querySelectorAll('.ex-item').forEach(el => {
+    el.addEventListener('click', () => toggleCheck(uid, el.dataset.id));
+  });
+}
+
+function renderExItem(ex, isDone, uid) {
+  const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
+  return `<div class="ex-item ${isDone?'done':''}" data-id="${ex.id}" style="margin-bottom:8px">
+    <div class="ex-check">
+      <svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none">
+        <path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="ex-info">
+      <span class="tag ${catClass}" style="margin-bottom:5px">${ex.cat}</span>
+      <div class="ex-name">${ex.name}</div>
+      <div class="ex-sets">${ex.sets}</div>
+      ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function toggleCheck(uid, exId) {
+  const k = getChecksKey(uid);
+  if (!checks[k]) checks[k] = [];
+  const idx = checks[k].indexOf(exId);
+  if (idx === -1) checks[k].push(exId);
+  else checks[k].splice(idx, 1);
+  if (db) {
+    try { await db.doc(`checks/${k}`).set({done: checks[k], user: uid, date: todayStr()}); } catch(e) {}
+  }
+  lsSet('gb_checks_'+k, checks[k]);
+  renderTodayExercises();
+}
+
+function renderUserSchedule() {
+  const uid = currentUser;
+  const items = schedules[uid];
+  const stretch = items.filter(e => e.cat === '스트레칭');
+  const power = items.filter(e => e.cat !== '스트레칭');
+  const container = document.getElementById('u-sched-list');
+
+  function exRow(ex, num) {
+    const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
+    return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div class="flex items-center gap-8" style="margin-bottom:5px">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);min-width:20px">${num}.</span>
+        <span class="tag ${catClass}">${ex.cat}</span>
+        <span style="font-weight:600;font-size:14px">${ex.name}</span>
+      </div>
+      <div style="padding-left:28px">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:${ex.note?'4px':'0'}">${ex.sets}</div>
+        ${ex.note ? `<div style="font-size:12px;color:var(--blue);line-height:1.5">★ ${ex.note}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  let num = 1;
+  let html = `<div class="card" style="padding:4px 16px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 0 8px">스트레칭 (${stretch.length}개)</div>
+    ${stretch.map(ex => exRow(ex, num++)).join('')}
+  </div>
+  <div class="card" style="padding:4px 16px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:12px 0 8px">근력 운동 (${power.length}개)</div>
+    ${power.map(ex => exRow(ex, num++)).join('')}
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+/* ─── Log form ─── */
+function initLogForm(uid) {
+  const d = new Date();
+  document.getElementById('u-log-date').textContent =
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 기록`;
+  // Pain scales
+  buildPainScale('pain-morning', 'morning');
+  buildPainScale('pain-evening', 'evening');
+  // Pre-fill exercise from today's checks
+  const done = getDoneList(uid);
+  const doneNames = (schedules[uid]||[]).filter(e => done.includes(e.id)).map(e=>e.name);
+  if (doneNames.length) document.getElementById('log-exercise').value = doneNames.join('\n');
+}
+
+function buildPainScale(containerId, which) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = [0,...Array.from({length:10},(_,i)=>i+1)].map(n =>
+    `<div class="pain-box" data-n="${n}" data-which="${which}" onclick="selectPain(this)">
+      ${n===0?'0':n}
+    </div>`
+  ).join('');
+}
+
+function selectPain(el) {
+  const which = el.dataset.which;
+  const n = parseInt(el.dataset.n);
+  if (which === 'morning') painMorning = n;
+  else painEvening = n;
+  const container = el.closest('.pain-scale');
+  container.querySelectorAll('.pain-box').forEach(b => {
+    const bn = parseInt(b.dataset.n);
+    b.className = 'pain-box';
+    if ((which==='morning'&&bn===painMorning)||(which==='evening'&&bn===painEvening)) {
+      b.classList.add(`active-${bn}`);
+    }
+  });
+}
+
+function adjSleep(delta) {
+  sleepVal = Math.max(0, Math.min(12, sleepVal + delta));
+  document.getElementById('sleep-val').textContent = sleepVal.toFixed(1);
+}
+
+async function submitLog() {
+  const uid = currentUser;
+  const btn = document.getElementById('log-submit-btn');
+  const status = document.getElementById('log-status');
+  btn.disabled = true;
+  btn.textContent = '전송 중…';
+  const record = {
+    user: uid,
+    name: USERS[uid].name,
+    date: todayStr(),
+    sleep: sleepVal,
+    food: document.getElementById('log-food').value.trim(),
+    exercise: document.getElementById('log-exercise').value.trim(),
+    notes: document.getElementById('log-notes').value.trim(),
+    painMorning,
+    painEvening,
+    timestamp: new Date().toISOString()
+  };
+  // Save to DB
+  if (db) {
+    try {
+      await db.doc(`records/${uid}-${record.date}`).set(record);
+    } catch(e) { console.warn(e); }
+  }
+  // Save locally
+  const existing = lsGet('gb_records_'+uid, []);
+  const idx = existing.findIndex(r => r.date === record.date);
+  if (idx >= 0) existing[idx] = record; else existing.unshift(record);
+  lsSet('gb_records_'+uid, existing);
+  records[uid] = existing;
+  // Send to Google Sheets if configured
+  const sheetsUrl = lsGet('gb_sheets_url', '');
+  if (sheetsUrl) {
+    try {
+      await fetch(sheetsUrl, {method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(record)});
+      status.textContent = '구글 시트에 저장되었습니다';
+    } catch(e) {
+      status.textContent = '로컬에만 저장됨 (시트 연결 확인)';
+    }
+  } else {
+    status.textContent = '저장되었습니다 (구글 시트 미연동)';
+  }
+  btn.disabled = false;
+  btn.textContent = '기록 전송하기';
+  renderHistory();
+}
+
+function renderHistory() {
+  const uid = currentUser;
+  if (!uid || uid === 'admin') return;
+  const recs = records[uid] || [];
+  const c = document.getElementById('history-list');
+  if (!recs.length) {
+    c.innerHTML = '<div class="text-muted text-sm" style="text-align:center;padding:32px">기록이 없습니다</div>';
+    return;
+  }
+  c.innerHTML = recs.slice(0,30).map(r => {
+    const pm = r.painMorning||0, pe = r.painEvening||0;
+    return `<div class="hist-card">
+      <div class="hist-date">${formatDate(r.date)}</div>
+      <div class="hist-row"><span class="hist-row-label">수면</span> ${r.sleep}시간</div>
+      <div class="hist-row">
+        <span class="hist-row-label">통증</span>
+        아침 <span class="${pm>=7?'text-red':pm>=4?'text-amber':'text-green'} font-700">${pm}</span>
+        &nbsp; 저녁 <span class="${pe>=7?'text-red':pe>=4?'text-amber':'text-green'} font-700">${pe}</span>
+      </div>
+      ${r.food?`<div class="hist-row"><span class="hist-row-label">식사</span> <span style="font-size:12px">${r.food}</span></div>`:''}
+      ${r.notes?`<div class="hist-row"><span class="hist-row-label">특이사항</span> <span style="font-size:12px;color:var(--muted)">${r.notes}</span></div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function userNav(btn) {
+  document.querySelectorAll('.user-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.user-subview').forEach(s => s.classList.remove('active'));
+  document.getElementById(btn.dataset.uv).classList.add('active');
+  if (btn.dataset.uv === 'u-schedule') renderUserSchedule();
+  if (btn.dataset.uv === 'u-history') renderHistory();
+  if (btn.dataset.uv === 'u-myinfo') loadMyInfoUI();
+  if (btn.dataset.uv === 'u-chat') initCoachChat();
+  if (btn.dataset.uv === 'u-log') {
+    const done = getDoneList(currentUser);
+    const doneNames = (schedules[currentUser]||[]).filter(e=>done.includes(e.id)).map(e=>e.name);
+    if (doneNames.length) document.getElementById('log-exercise').value = doneNames.join('\n');
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   ATTACHMENT HANDLING
+═══════════════════════════════════════════════════════ */
+// pending attachments: [{base64, mimeType, isVideo, name}]
+let adminAttachments = [];
+let coachAttachments = [];
+
+function handleAttach(input, ctx) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const attachments = ctx === 'admin' ? adminAttachments : coachAttachments;
+  const previewEl = document.getElementById(`${ctx}-attach-preview`);
+
+  files.forEach(file => {
+    if (file.type.startsWith('video/')) {
+      // Extract first frame from video
+      extractVideoFrame(file).then(({base64, mimeType}) => {
+        attachments.push({base64, mimeType, isVideo:true, name:file.name, videoFile:file});
+        renderAttachPreviews(ctx);
+      });
+    } else if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const raw = e.target.result; // data:image/...;base64,...
+        const [header, base64] = raw.split(',');
+        const mimeType = header.match(/:(.*?);/)[1];
+        attachments.push({base64, mimeType, isVideo:false, name:file.name, previewUrl:raw});
+        renderAttachPreviews(ctx);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  input.value = ''; // allow re-selecting same file
+}
+
+function extractVideoFrame(file) {
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.src = url;
+    video.muted = true;
+    video.crossOrigin = 'anonymous';
+    video.addEventListener('loadeddata', () => {
+      video.currentTime = 0.1;
+    });
+    video.addEventListener('seeked', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.min(video.videoWidth, 1280);
+      canvas.height = Math.round(video.videoHeight * (canvas.width / video.videoWidth));
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const [, base64] = dataUrl.split(',');
+      URL.revokeObjectURL(url);
+      resolve({base64, mimeType:'image/jpeg'});
+    });
+    video.load();
+  });
+}
+
+function renderAttachPreviews(ctx) {
+  const attachments = ctx === 'admin' ? adminAttachments : coachAttachments;
+  const previewEl = document.getElementById(`${ctx}-attach-preview`);
+  previewEl.innerHTML = attachments.map((a, i) => `
+    <div class="attach-thumb">
+      <img src="data:${a.mimeType};base64,${a.base64}" alt="${a.name}">
+      ${a.isVideo ? '<div style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.6);border-radius:3px;padding:1px 4px;font-size:9px;color:#fff">동영상</div>' : ''}
+      <div class="attach-thumb-del" onclick="removeAttach(${i},'${ctx}')">✕</div>
+    </div>`).join('');
+}
+
+function removeAttach(idx, ctx) {
+  const attachments = ctx === 'admin' ? adminAttachments : coachAttachments;
+  attachments.splice(idx, 1);
+  renderAttachPreviews(ctx);
+}
+
+function buildImageContent(text, attachments) {
+  // Returns content array for OpenAI/Claude with images included
+  if (!attachments.length) return text; // plain string if no attachments
+  const parts = [{type:'text', text: text || '이 이미지/영상을 분석해주세요.'}];
+  attachments.forEach(a => {
+    parts.push({
+      type:'image_url',
+      image_url:{url:`data:${a.mimeType};base64,${a.base64}`, detail:'high'}
+    });
+  });
+  return parts; // array format for OpenAI vision
+}
+
+function buildImageContentClaude(text, attachments) {
+  // Anthropic format
+  if (!attachments.length) return text;
+  const parts = [];
+  attachments.forEach(a => {
+    parts.push({type:'image', source:{type:'base64', media_type:a.mimeType, data:a.base64}});
+  });
+  parts.push({type:'text', text: text || '이 이미지/영상을 분석해주세요.'});
+  return parts;
+}
+
+function appendAttachMsgs(attachments, msgContainerId) {
+  // Show image thumbnails in chat bubble
+  attachments.forEach(a => {
+    const c = document.getElementById(msgContainerId);
+    const el = document.createElement('div');
+    el.className = 'msg msg-user';
+    el.style.padding = '6px';
+    el.innerHTML = `<img src="data:${a.mimeType};base64,${a.base64}" class="msg-img" alt="${a.name}">
+      ${a.isVideo ? `<div style="font-size:10px;margin-top:3px;opacity:.8">동영상 프레임</div>` : ''}`;
+    c.appendChild(el);
+    c.scrollTop = c.scrollHeight;
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   AI CHAT
+═══════════════════════════════════════════════════════ */
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+document.getElementById('coach-chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCoachChat(); }
+});
+
+async function sendChat() {
+  if (adminSending) return;
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg && !adminAttachments.length) return;
+  const provider = document.getElementById('ai-provider').value;
+  const apiKey = lsGet('gb_ai_key_'+provider, '');
+  if (!apiKey) { showToast('API 키를 먼저 설정해주세요', 'err'); return; }
+  adminSending = true;
+  input.value = '';
+  // Capture & clear attachments
+  const attaches = [...adminAttachments];
+  adminAttachments = [];
+  document.getElementById('admin-attach-preview').innerHTML = '';
+  if (attaches.length) appendAttachMsgs(attaches, 'chat-messages');
+  if (msg) appendChatMsg('user', msg);
+  // Build history entry with images if any
+  const userContent = provider === 'openai'
+    ? buildImageContent(msg, attaches)
+    : buildImageContentClaude(msg, attaches);
+  chatHistory.push({role:'user', content: userContent});
+  const thinkEl = appendChatMsg('think', '생각 중…');
+  document.getElementById('chat-send-btn').disabled = true;
+  // Build context
+  const ctx = document.getElementById('chat-context').value;
+  const ctxParts = [];
+  if (ctx !== 'seungwoo') {
+    const prof = profiles.yuchan ? `\n- 프로필/병력:\n${profiles.yuchan}` : '';
+    ctxParts.push(`## 김유찬 코치님\n- 운동일: 월/수/금/토${prof}\n- 현재 운동: ${schedules.yuchan.map(e=>`${e.name} (${e.sets}${e.note?`, 주의: ${e.note}`:''})`).join(', ')}`);
+  }
+  if (ctx !== 'yuchan') {
+    const prof = profiles.seungwoo ? `\n- 프로필/병력:\n${profiles.seungwoo}` : '';
+    ctxParts.push(`## 한승우 코치님\n- 운동일: 월/수/금/토${prof}\n- 현재 운동: ${schedules.seungwoo.map(e=>`${e.name} (${e.sets}${e.note?`, 주의: ${e.note}`:''})`).join(', ')}`);
+  }
+  const uidsForCtx = ctx === 'both' ? ['yuchan','seungwoo'] : [ctx];
+  const recentCtx = buildRecentRecordsContext(uidsForCtx);
+  const rehabRefBlock = rehabRef ? `\n\n--- 재활 참고자료 ---\n${rehabRef}` : '';
+  const systemMsg = `당신은 복싱 코치들의 재활을 전문으로 하는 물리치료사입니다. G복싱 소속 코치님들의 재활 프로그램을 담당하고 있습니다.${rehabRefBlock}
+
+${ctxParts.join('\n\n')}
+
+--- 최근 기록 (자동 업데이트됨) ---
+${recentCtx}
+
+운동 처방 시 통증 없이 진행 가능한 운동을 우선하고, 각 코치님의 상태에 맞게 조언해주세요. 한국어로 답변하세요.
+
+운동 스케쥴을 제안할 때는 반드시 아래 JSON 형식을 포함하세요 (앱에서 자동 적용 가능):
+\`\`\`schedule
+[{"cat":"스트레칭","name":"운동명","sets":"횟수/시간","note":"코칭 포인트"},...]
+\`\`\`
+스케쥴 제안이 아닌 일반 질문에는 이 형식을 사용하지 마세요.`;
+  try {
+    let replyText = '';
+    if (provider === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body: JSON.stringify({
+          model:'gpt-4o',
+          messages:[{role:'system',content:systemMsg},...chatHistory],
+          max_tokens:1000
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      replyText = data.choices[0].message.content;
+    } else {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+        body: JSON.stringify({
+          model:'claude-opus-4-5', // update if needed
+          max_tokens:1000,
+          system: systemMsg,
+          messages: chatHistory
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      replyText = data.content[0].text;
+    }
+    thinkEl.remove();
+    appendChatMsg('ai', replyText);
+    chatHistory.push({role:'assistant', content: replyText});
+    // Detect schedule block → show apply button (admin only)
+    const schedMatch = replyText.match(/```schedule\s*([\s\S]*?)```/);
+    if (schedMatch) {
+      const applyUid = ctx === 'both' ? null : ctx;
+      showScheduleApplyBtn(schedMatch[1].trim(), applyUid);
+    }
+  } catch(e) {
+    thinkEl.remove();
+    appendChatMsg('ai', `오류가 발생했습니다: ${e.message}`);
+  } finally {
+    adminSending = false;
+    document.getElementById('chat-send-btn').disabled = false;
+  }
+}
+
+function appendChatMsg(type, text) {
+  const c = document.getElementById('chat-messages');
+  const el = document.createElement('div');
+  el.textContent = text;
+  if (type === 'user') el.className = 'msg msg-user';
+  else if (type === 'ai') el.className = 'msg msg-ai';
+  else { el.className = 'chat-thinking'; }
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+  return el;
+}
+
+/* ════════════════════════════════════════════════════
+   COACH AI CHAT
+═══════════════════════════════════════════════════════ */
+function initCoachChat() {
+  if (coachChatHistory.length) return; // don't reset if already started
+  const container = document.getElementById('coach-chat-messages');
+  if (!container) return;
+  coachChatHistory = [];
+  container.innerHTML = '<div class="msg msg-system">운동, 재활에 대해 질문하세요.<br>예: "버드독 할 때 허리가 당기는데 어떻게 해야 하나요?"</div>';
+}
+
+async function sendCoachChat() {
+  if (coachSending) return;
+  const uid = currentUser;
+  const input = document.getElementById('coach-chat-input');
+  const msg = input.value.trim();
+  if (!msg && !coachAttachments.length) return;
+
+  const provider = lsGet('gb_ai_provider', 'openai');
+  const apiKey = lsGet('gb_ai_key_'+provider, '');
+  if (!apiKey) { showToast('API 키 미설정 (관리자 문의)', 'err'); return; }
+
+  coachSending = true;
+  input.value = '';
+  // Capture & clear attachments
+  const attaches = [...coachAttachments];
+  coachAttachments = [];
+  document.getElementById('coach-attach-preview').innerHTML = '';
+  if (attaches.length) appendAttachMsgs(attaches, 'coach-chat-messages');
+  if (msg) appendCoachChatMsg('user', msg);
+  // Build history entry with images if any
+  const userContent = provider === 'openai'
+    ? buildImageContent(msg, attaches)
+    : buildImageContentClaude(msg, attaches);
+  coachChatHistory.push({role:'user', content: userContent});
+  const thinkEl = appendCoachChatMsg('think', '생각 중…');
+  document.getElementById('coach-send-btn').disabled = true;
+
+  const u = USERS[uid];
+  const exList = schedules[uid].map(e => `${e.name} (${e.sets}${e.note?`, 주의: ${e.note}`:''})`).join('\n- ');
+  const recentRecs = buildRecentRecordsContext([uid]);
+  const myProfile = profiles[uid] ? `\n\n--- 내 프로필/병력 ---\n${profiles[uid]}` : '';
+  const rehabRefBlock2 = rehabRef ? `\n\n--- 재활 참고자료 ---\n${rehabRef}` : '';
+  const systemMsg = `당신은 복싱 코치의 재활을 전문으로 하는 물리치료사입니다.${rehabRefBlock2}
+
+코치: ${u.name}${myProfile}
+
+현재 운동 프로그램:
+- ${exList}
+
+${recentRecs}
+
+코치님에게 맞는 실용적인 조언을 한국어로 해주세요. 통증이 있을 경우 즉시 전문가 상담을 권고하세요.`;
+
+  try {
+    let replyText = '';
+    if (provider === 'openai') {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+        body: JSON.stringify({
+          model:'gpt-4o',
+          messages:[{role:'system',content:systemMsg},...coachChatHistory],
+          max_tokens:800
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      replyText = data.choices[0].message.content;
+    } else {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+        body: JSON.stringify({model:'claude-opus-4-5',max_tokens:800,system:systemMsg,messages:coachChatHistory})
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      replyText = data.content[0].text;
+    }
+    thinkEl.remove();
+    appendCoachChatMsg('ai', replyText);
+    coachChatHistory.push({role:'assistant', content: replyText});
+  } catch(e) {
+    thinkEl.remove();
+    appendCoachChatMsg('ai', `오류: ${e.message}`);
+  } finally {
+    coachSending = false;
+    document.getElementById('coach-send-btn').disabled = false;
+  }
+}
+
+function appendCoachChatMsg(type, text) {
+  const c = document.getElementById('coach-chat-messages');
+  const el = document.createElement('div');
+  el.textContent = text;
+  if (type === 'user') el.className = 'msg msg-user';
+  else if (type === 'ai') el.className = 'msg msg-ai';
+  else el.className = 'chat-thinking';
+  c.appendChild(el);
+  c.scrollTop = c.scrollHeight;
+  return el;
+}
+
+/* ════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+function showToast(msg, type) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = `position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+    background:${type==='err'?'var(--red)':'var(--elevated)'};
+    color:${type==='err'?'#fff':'var(--text)'};border:1px solid var(--border);
+    padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;z-index:999;
+    box-shadow:0 4px 20px rgba(0,0,0,.4)`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+/* ════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════ */
+// Load schedules from localStorage as fallback
+['yuchan','seungwoo'].forEach(uid => {
+  const saved = lsGet('gb_sched_'+uid, null);
+  if (saved && Array.isArray(saved)) schedules[uid] = saved;
+});
+
+initDb();
+</script>
+</body>
+</html>
