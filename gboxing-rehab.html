@@ -94,19 +94,20 @@ textarea.input{resize:vertical;min-height:72px}
 .label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;
         text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 
-/* ─── exercise images ──────────────────────────────── */
-.ex-imgs{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-.ex-img-thumb{width:110px;height:74px;object-fit:cover;border-radius:7px;cursor:pointer;
-              border:1px solid var(--border);background:var(--elevated);flex-shrink:0;
-              transition:opacity .15s;display:block}
-.ex-img-thumb:hover{opacity:.85}
-.img-label{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-           color:var(--muted);margin-bottom:3px;text-align:center}
-.img-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;
-                   display:flex;align-items:center;justify-content:center;cursor:pointer;
-                   flex-direction:column;gap:12px}
-.img-modal-overlay img{max-width:92vw;max-height:80vh;border-radius:10px;object-fit:contain}
-.img-modal-close{color:#fff;font-size:13px;opacity:.6}
+/* ─── exercise video ──────────────────────────────── */
+.ex-video-btn{display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+              padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;
+              background:rgba(224,45,60,.12);color:var(--red);border:1px solid rgba(224,45,60,.3);
+              cursor:pointer;transition:background .15s}
+.ex-video-btn:hover{background:rgba(224,45,60,.2)}
+.video-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;
+                     display:flex;align-items:center;justify-content:center;
+                     flex-direction:column;gap:14px}
+.video-modal-inner{width:min(92vw,640px);aspect-ratio:16/9;border-radius:10px;overflow:hidden;
+                   background:#000;position:relative}
+.video-modal-inner iframe{width:100%;height:100%;border:none}
+.video-modal-close{color:#fff;font-size:13px;opacity:.6;cursor:pointer;
+                   background:rgba(255,255,255,.08);padding:6px 18px;border-radius:20px;border:none}
 
 /* ─── pain scale ────────────────────────────────────── */
 .pain-scale{display:flex;gap:4px}
@@ -1211,7 +1212,8 @@ function renderAdminSched(uid) {
   const grid = document.getElementById(`sched-${uid}`);
   if (!grid) return;
   grid.innerHTML = schedules[uid].map(ex => {
-    const hasImg = ex.img1 || ex.img2;
+    const hasVideo = !!ex.video;
+    const ytThumb = hasVideo ? getYoutubeThumbnail(ex.video) : '';
     return `
     <div class="sched-item" data-id="${ex.id}" style="flex-direction:column;align-items:stretch;gap:6px">
       <div style="display:flex;align-items:flex-start;gap:10px">
@@ -1225,26 +1227,28 @@ function renderAdminSched(uid) {
       </div>
       <div style="padding-left:26px">
         <button onclick="toggleImgInputs('${ex.id}')"
-          style="font-size:11px;color:${hasImg?'var(--green)':'var(--muted)'};cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:4px">
-          📷 ${hasImg?'이미지 편집':'이미지 추가'}
+          style="font-size:11px;color:${hasVideo?'var(--green)':'var(--muted)'};cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:4px">
+          🎬 ${hasVideo?'영상 편집':'영상 링크 추가'}
         </button>
-        <div id="img-inputs-${ex.id}" style="${hasImg?'':'display:none'};margin-top:6px;display:${hasImg?'flex':'none'};flex-direction:column;gap:6px">
-          <button onclick="searchExImg('${ex.name.replace(/'/g,'\\\'')}')"
-            style="font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 10px;cursor:pointer;width:fit-content">
-            🔍 구글 이미지 검색 (새 탭)
-          </button>
-          <div style="display:flex;align-items:center;gap:6px">
-            <input class="input" style="font-size:12px;padding:5px 10px;flex:1" value="${ex.img1||''}"
-              placeholder="🔗 시작 자세 이미지 URL (붙여넣기)"
-              onblur="updateExImg('${uid}','${ex.id}','img1',this.value)">
-            ${ex.img1 ? `<img src="${ex.img1}" style="height:36px;width:54px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : ''}
+        <div id="img-inputs-${ex.id}" style="display:${hasVideo?'flex':'none'};margin-top:8px;flex-direction:column;gap:7px">
+          <div style="display:flex;gap:6px">
+            <button onclick="searchExImg('${ex.name.replace(/'/g,'\\\'')}')"
+              style="font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap">
+              🔍 유튜브 검색
+            </button>
+            <input class="input" style="font-size:12px;padding:5px 10px;flex:1" value="${ex.video||''}"
+              id="vid-input-${ex.id}"
+              placeholder="유튜브 URL 붙여넣기 (youtube.com/watch?v=...)"
+              onblur="updateExVideo('${uid}','${ex.id}',this.value)">
           </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <input class="input" style="font-size:12px;padding:5px 10px;flex:1" value="${ex.img2||''}"
-              placeholder="🔗 끝 자세 이미지 URL (붙여넣기)"
-              onblur="updateExImg('${uid}','${ex.id}','img2',this.value)">
-            ${ex.img2 ? `<img src="${ex.img2}" style="height:36px;width:54px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : ''}
-          </div>
+          ${ytThumb ? `
+          <div style="display:flex;align-items:center;gap:8px">
+            <img src="${ytThumb}" style="height:48px;width:85px;border-radius:5px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">
+            <button onclick="showVideoModal('${ex.video||''}')"
+              style="font-size:11px;color:var(--red);cursor:pointer;padding:4px 10px;border:1px solid rgba(224,45,60,.3);border-radius:5px;background:rgba(224,45,60,.08)">
+              ▶ 미리보기
+            </button>
+          </div>` : ''}
         </div>
       </div>
     </div>`;
@@ -1257,12 +1261,30 @@ function toggleImgInputs(exId) {
   el.style.display = el.style.display === 'none' ? 'flex' : 'none';
 }
 
+
+function updateExVideo(uid, exId, value) {
+  const ex = schedules[uid].find(e => e.id === exId);
+  if (!ex) return;
+  ex.video = value.trim();
+  saveSchedule(uid);
+  renderAdminSched(uid);
+}
+
+function extractYoutubeId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function getYoutubeThumbnail(url) {
+  const id = extractYoutubeId(url);
+  return id ? `https://i.ytimg.com/vi/${id}/mqdefault.jpg` : '';
+}
+
 function searchExImg(exName) {
-  // Extract English name from parentheses if present, else use full name
   const match = exName.match(/\(([^)]+)\)/);
   const query = match ? match[1] : exName;
-  const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' exercise how to')}&tbm=isch`;
-  window.open(url, '_blank');
+  window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' exercise tutorial')}`, '_blank');
 }
 
 function searchExImgByInput(inputId) {
@@ -1270,14 +1292,6 @@ function searchExImgByInput(inputId) {
   const exName = el ? el.value.trim() : '';
   if (!exName) { alert('먼저 운동 이름을 입력하세요'); return; }
   searchExImg(exName);
-}
-
-function updateExImg(uid, exId, field, value) {
-  const ex = schedules[uid].find(e => e.id === exId);
-  if (!ex) return;
-  ex[field] = value.trim();
-  saveSchedule(uid);
-  renderAdminSched(uid);
 }
 
 function adminTab(uid, tab, btn) {
@@ -1416,16 +1430,13 @@ function showAddEx(uid) {
         <input class="input" id="new-note-${uid}" placeholder="코칭 포인트"></div>
     </div>
     <div style="margin-bottom:10px">
-      <label class="label">이미지 (선택) — 구글에서 이미지 찾기 후 URL 붙여넣기</label>
-      <button onclick="searchExImgByInput('new-name-${uid}')"
-        style="font-size:12px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 12px;cursor:pointer;margin-bottom:8px">
-        🔍 운동 이름으로 구글 이미지 검색
-      </button>
-      <div class="add-ex-grid">
-        <div><label class="label" style="margin-top:0">시작 자세 URL</label>
-          <input class="input" id="new-img1-${uid}" placeholder="https://..."></div>
-        <div><label class="label" style="margin-top:0">끝 자세 URL</label>
-          <input class="input" id="new-img2-${uid}" placeholder="https://..."></div>
+      <label class="label">동작 영상 (선택)</label>
+      <div style="display:flex;gap:6px">
+        <button onclick="searchExImgByInput('new-name-${uid}')"
+          style="font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap">
+          🔍 유튜브 검색
+        </button>
+        <input class="input" id="new-video-${uid}" placeholder="유튜브 URL 붙여넣기 (youtube.com/watch?v=...)">
       </div>
     </div>
     <div class="flex gap-8">
@@ -1444,8 +1455,7 @@ function addEx(uid) {
     name,
     sets: document.getElementById(`new-sets-${uid}`).value.trim(),
     note: document.getElementById(`new-note-${uid}`).value.trim(),
-    img1: document.getElementById(`new-img1-${uid}`)?.value.trim() || '',
-    img2: document.getElementById(`new-img2-${uid}`)?.value.trim() || ''
+    video: document.getElementById(`new-video-${uid}`)?.value.trim() || ''
   };
   schedules[uid].push(ex);
   saveSchedule(uid);
@@ -1759,15 +1769,11 @@ function renderTodayExercises() {
 
 function renderExItem(ex, isDone, uid) {
   const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
-  const imgs = [[ex.img1,'시작'], [ex.img2,'끝']].filter(([u]) => u);
-  const imgHtml = imgs.length ? `
-    <div class="ex-imgs" style="margin-top:10px" onclick="event.stopPropagation()">
-      ${imgs.map(([url, label]) => `
-        <div>
-          <div class="img-label">${label}</div>
-          <img class="ex-img-thumb" src="${url}" alt="${label}" loading="lazy"
-            onclick="showExImg('${url}','${ex.name} — ${label} 자세')" onerror="this.style.display='none'">
-        </div>`).join('')}
+  const videoHtml = ex.video ? `
+    <div onclick="event.stopPropagation()">
+      <button class="ex-video-btn" onclick="showVideoModal('${ex.video}')">
+        ▶ 동작 영상 보기
+      </button>
     </div>` : '';
   return `<div class="ex-item ${isDone?'done':''}" data-id="${ex.id}" style="margin-bottom:8px">
     <div class="ex-check">
@@ -1780,7 +1786,7 @@ function renderExItem(ex, isDone, uid) {
       <div class="ex-name">${ex.name}</div>
       <div class="ex-sets">${ex.sets}</div>
       ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
-      ${imgHtml}
+      ${videoHtml}
     </div>
   </div>`;
 }
@@ -1807,16 +1813,10 @@ function renderUserSchedule() {
 
   function exRow(ex, num) {
     const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
-    const imgs = [[ex.img1,'시작'], [ex.img2,'끝']].filter(([u]) => u);
-    const imgHtml = imgs.length ? `
-      <div class="ex-imgs">
-        ${imgs.map(([url, label]) => `
-          <div>
-            <div class="img-label">${label} 자세</div>
-            <img class="ex-img-thumb" src="${url}" alt="${label} 자세" loading="lazy"
-              onclick="showExImg('${url}','${ex.name} — ${label} 자세')" onerror="this.style.display='none'">
-          </div>`).join('')}
-      </div>` : '';
+    const videoHtml = ex.video ? `
+      <button class="ex-video-btn" onclick="showVideoModal('${ex.video}')">
+        ▶ 동작 영상 보기
+      </button>` : '';
     return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
       <div class="flex items-center gap-8" style="margin-bottom:5px">
         <span style="font-size:11px;font-weight:700;color:var(--muted);min-width:20px">${num}.</span>
@@ -1826,7 +1826,7 @@ function renderUserSchedule() {
       <div style="padding-left:28px">
         <div style="font-size:12px;color:var(--muted);margin-bottom:${ex.note?'4px':'0'}">${ex.sets}</div>
         ${ex.note ? `<div style="font-size:12px;color:var(--blue);line-height:1.5">★ ${ex.note}</div>` : ''}
-        ${imgHtml}
+        ${videoHtml}
       </div>
     </div>`;
   }
@@ -2319,13 +2319,25 @@ function appendCoachChatMsg(type, text) {
 /* ════════════════════════════════════════════════════
    TOAST
 ═══════════════════════════════════════════════════════ */
-function showExImg(url, caption) {
+function showVideoModal(url) {
+  if (!url) return;
+  const ytId = extractYoutubeId(url);
   const overlay = document.createElement('div');
-  overlay.className = 'img-modal-overlay';
-  overlay.innerHTML = `
-    <img src="${url}" alt="${caption}" onerror="this.src=''">
-    <div class="img-modal-close">탭하면 닫힘 · ${caption}</div>`;
-  overlay.onclick = () => overlay.remove();
+  overlay.className = 'video-modal-overlay';
+  if (ytId) {
+    overlay.innerHTML = `
+      <div class="video-modal-inner">
+        <iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0" allowfullscreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+        </iframe>
+      </div>
+      <button class="video-modal-close" onclick="this.closest('.video-modal-overlay').remove()">✕ 닫기</button>`;
+  } else {
+    // Not YouTube — open in new tab
+    window.open(url, '_blank');
+    return;
+  }
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
 
