@@ -94,6 +94,20 @@ textarea.input{resize:vertical;min-height:72px}
 .label{display:block;font-size:12px;font-weight:700;letter-spacing:.05em;
         text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 
+/* ─── exercise images ──────────────────────────────── */
+.ex-imgs{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.ex-img-thumb{width:110px;height:74px;object-fit:cover;border-radius:7px;cursor:pointer;
+              border:1px solid var(--border);background:var(--elevated);flex-shrink:0;
+              transition:opacity .15s;display:block}
+.ex-img-thumb:hover{opacity:.85}
+.img-label{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+           color:var(--muted);margin-bottom:3px;text-align:center}
+.img-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;
+                   display:flex;align-items:center;justify-content:center;cursor:pointer;
+                   flex-direction:column;gap:12px}
+.img-modal-overlay img{max-width:92vw;max-height:80vh;border-radius:10px;object-fit:contain}
+.img-modal-close{color:#fff;font-size:13px;opacity:.6}
+
 /* ─── pain scale ────────────────────────────────────── */
 .pain-scale{display:flex;gap:4px}
 .pain-box{width:28px;height:28px;border-radius:4px;display:flex;align-items:center;
@@ -440,6 +454,7 @@ textarea.input{resize:vertical;min-height:72px}
       <div class="flex gap-8" style="margin-bottom:16px">
         <button class="btn btn-ghost btn-sm btn-red" data-tab="week" onclick="adminTab('yuchan','week',this)">이번 주</button>
         <button class="btn btn-ghost btn-sm" data-tab="records" onclick="adminTab('yuchan','records',this)">기록</button>
+        <button class="btn btn-ghost btn-sm" data-tab="sched" onclick="adminTab('yuchan','sched',this)">스케줄 편집</button>
       </div>
       <div id="yuchan-tab-week">
         <div class="section-title">이번 주 현황</div>
@@ -448,6 +463,14 @@ textarea.input{resize:vertical;min-height:72px}
       <div id="yuchan-tab-records" class="hidden">
         <div class="section-title">기록 내역</div>
         <div class="card" style="overflow-x:auto"><table class="records-table" id="tbl-yuchan"></table></div>
+      </div>
+      <div id="yuchan-tab-sched" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="section-title" style="margin-bottom:0">운동 목록 편집</div>
+          <button class="btn btn-ghost btn-sm" onclick="showAddEx('yuchan')">+ 운동 추가</button>
+        </div>
+        <div class="schedule-grid" id="sched-yuchan"></div>
+        <div id="add-ex-yuchan"></div>
       </div>
     </section>
 
@@ -462,6 +485,7 @@ textarea.input{resize:vertical;min-height:72px}
       <div class="flex gap-8" style="margin-bottom:16px">
         <button class="btn btn-ghost btn-sm btn-red" data-tab="week" onclick="adminTab('seungwoo','week',this)">이번 주</button>
         <button class="btn btn-ghost btn-sm" data-tab="records" onclick="adminTab('seungwoo','records',this)">기록</button>
+        <button class="btn btn-ghost btn-sm" data-tab="sched" onclick="adminTab('seungwoo','sched',this)">스케줄 편집</button>
       </div>
       <div id="seungwoo-tab-week">
         <div class="section-title">이번 주 현황</div>
@@ -470,6 +494,14 @@ textarea.input{resize:vertical;min-height:72px}
       <div id="seungwoo-tab-records" class="hidden">
         <div class="section-title">기록 내역</div>
         <div class="card" style="overflow-x:auto"><table class="records-table" id="tbl-seungwoo"></table></div>
+      </div>
+      <div id="seungwoo-tab-sched" class="hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="section-title" style="margin-bottom:0">운동 목록 편집</div>
+          <button class="btn btn-ghost btn-sm" onclick="showAddEx('seungwoo')">+ 운동 추가</button>
+        </div>
+        <div class="schedule-grid" id="sched-seungwoo"></div>
+        <div id="add-ex-seungwoo"></div>
       </div>
     </section>
 
@@ -1178,16 +1210,74 @@ function adminGoUser(uid) {
 function renderAdminSched(uid) {
   const grid = document.getElementById(`sched-${uid}`);
   if (!grid) return;
-  grid.innerHTML = schedules[uid].map(ex => `
-    <div class="sched-item" data-id="${ex.id}">
-      <span class="sched-drag">⠿</span>
-      <div class="sched-info">
-        <span class="sched-cat tag ${ex.cat==='스트레칭'?'tag-stretch-ex':'tag-power'}">${ex.cat}</span>
-        <div class="sched-name">${ex.name}</div>
-        <div class="sched-meta">${ex.sets}${ex.note?` · <em style="color:var(--faint)">${ex.note}</em>`:''}</div>
+  grid.innerHTML = schedules[uid].map(ex => {
+    const hasImg = ex.img1 || ex.img2;
+    return `
+    <div class="sched-item" data-id="${ex.id}" style="flex-direction:column;align-items:stretch;gap:6px">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <span class="sched-drag" style="padding-top:4px">⠿</span>
+        <div class="sched-info" style="flex:1">
+          <span class="sched-cat tag ${ex.cat==='스트레칭'?'tag-stretch-ex':'tag-power'}">${ex.cat}</span>
+          <div class="sched-name">${ex.name}</div>
+          <div class="sched-meta">${ex.sets}${ex.note?` · <em style="color:var(--faint)">${ex.note}</em>`:''}</div>
+        </div>
+        <button class="sched-del" title="삭제" onclick="deleteEx('${uid}','${ex.id}')">×</button>
       </div>
-      <button class="sched-del" title="삭제" onclick="deleteEx('${uid}','${ex.id}')">×</button>
-    </div>`).join('');
+      <div style="padding-left:26px">
+        <button onclick="toggleImgInputs('${ex.id}')"
+          style="font-size:11px;color:${hasImg?'var(--green)':'var(--muted)'};cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:4px">
+          📷 ${hasImg?'이미지 편집':'이미지 추가'}
+        </button>
+        <div id="img-inputs-${ex.id}" style="${hasImg?'':'display:none'};margin-top:6px;display:${hasImg?'flex':'none'};flex-direction:column;gap:6px">
+          <button onclick="searchExImg('${ex.name.replace(/'/g,'\\\'')}')"
+            style="font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 10px;cursor:pointer;width:fit-content">
+            🔍 구글 이미지 검색 (새 탭)
+          </button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="input" style="font-size:12px;padding:5px 10px;flex:1" value="${ex.img1||''}"
+              placeholder="🔗 시작 자세 이미지 URL (붙여넣기)"
+              onblur="updateExImg('${uid}','${ex.id}','img1',this.value)">
+            ${ex.img1 ? `<img src="${ex.img1}" style="height:36px;width:54px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input class="input" style="font-size:12px;padding:5px 10px;flex:1" value="${ex.img2||''}"
+              placeholder="🔗 끝 자세 이미지 URL (붙여넣기)"
+              onblur="updateExImg('${uid}','${ex.id}','img2',this.value)">
+            ${ex.img2 ? `<img src="${ex.img2}" style="height:36px;width:54px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0" onerror="this.style.display='none'">` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleImgInputs(exId) {
+  const el = document.getElementById(`img-inputs-${exId}`);
+  if (!el) return;
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function searchExImg(exName) {
+  // Extract English name from parentheses if present, else use full name
+  const match = exName.match(/\(([^)]+)\)/);
+  const query = match ? match[1] : exName;
+  const url = `https://www.google.com/search?q=${encodeURIComponent(query + ' exercise how to')}&tbm=isch`;
+  window.open(url, '_blank');
+}
+
+function searchExImgByInput(inputId) {
+  const el = document.getElementById(inputId);
+  const exName = el ? el.value.trim() : '';
+  if (!exName) { alert('먼저 운동 이름을 입력하세요'); return; }
+  searchExImg(exName);
+}
+
+function updateExImg(uid, exId, field, value) {
+  const ex = schedules[uid].find(e => e.id === exId);
+  if (!ex) return;
+  ex[field] = value.trim();
+  saveSchedule(uid);
+  renderAdminSched(uid);
 }
 
 function adminTab(uid, tab, btn) {
@@ -1196,9 +1286,12 @@ function adminTab(uid, tab, btn) {
   btn.classList.add('btn-red');
   const weekEl  = document.getElementById(`${uid}-tab-week`);
   const recsEl  = document.getElementById(`${uid}-tab-records`);
+  const schedEl = document.getElementById(`${uid}-tab-sched`);
   weekEl.classList.add('hidden');
   recsEl.classList.add('hidden');
+  if (schedEl) schedEl.classList.add('hidden');
   if (tab === 'week') { weekEl.classList.remove('hidden'); renderCoachWeek(uid); }
+  else if (tab === 'sched') { if (schedEl) { schedEl.classList.remove('hidden'); renderAdminSched(uid); } }
   else { recsEl.classList.remove('hidden'); renderAdminRecords(uid); }
 }
 
@@ -1322,6 +1415,19 @@ function showAddEx(uid) {
       <div><label class="label">주의사항 (선택)</label>
         <input class="input" id="new-note-${uid}" placeholder="코칭 포인트"></div>
     </div>
+    <div style="margin-bottom:10px">
+      <label class="label">이미지 (선택) — 구글에서 이미지 찾기 후 URL 붙여넣기</label>
+      <button onclick="searchExImgByInput('new-name-${uid}')"
+        style="font-size:12px;background:var(--elevated);border:1px solid var(--border);color:var(--blue);border-radius:6px;padding:5px 12px;cursor:pointer;margin-bottom:8px">
+        🔍 운동 이름으로 구글 이미지 검색
+      </button>
+      <div class="add-ex-grid">
+        <div><label class="label" style="margin-top:0">시작 자세 URL</label>
+          <input class="input" id="new-img1-${uid}" placeholder="https://..."></div>
+        <div><label class="label" style="margin-top:0">끝 자세 URL</label>
+          <input class="input" id="new-img2-${uid}" placeholder="https://..."></div>
+      </div>
+    </div>
     <div class="flex gap-8">
       <button class="btn btn-red btn-sm" onclick="addEx('${uid}')">추가</button>
       <button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-ex-${uid}').innerHTML=''">취소</button>
@@ -1337,7 +1443,9 @@ function addEx(uid) {
     cat: document.getElementById(`new-cat-${uid}`).value,
     name,
     sets: document.getElementById(`new-sets-${uid}`).value.trim(),
-    note: document.getElementById(`new-note-${uid}`).value.trim()
+    note: document.getElementById(`new-note-${uid}`).value.trim(),
+    img1: document.getElementById(`new-img1-${uid}`)?.value.trim() || '',
+    img2: document.getElementById(`new-img2-${uid}`)?.value.trim() || ''
   };
   schedules[uid].push(ex);
   saveSchedule(uid);
@@ -1651,6 +1759,16 @@ function renderTodayExercises() {
 
 function renderExItem(ex, isDone, uid) {
   const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
+  const imgs = [[ex.img1,'시작'], [ex.img2,'끝']].filter(([u]) => u);
+  const imgHtml = imgs.length ? `
+    <div class="ex-imgs" style="margin-top:10px" onclick="event.stopPropagation()">
+      ${imgs.map(([url, label]) => `
+        <div>
+          <div class="img-label">${label}</div>
+          <img class="ex-img-thumb" src="${url}" alt="${label}" loading="lazy"
+            onclick="showExImg('${url}','${ex.name} — ${label} 자세')" onerror="this.style.display='none'">
+        </div>`).join('')}
+    </div>` : '';
   return `<div class="ex-item ${isDone?'done':''}" data-id="${ex.id}" style="margin-bottom:8px">
     <div class="ex-check">
       <svg class="check-svg" width="12" height="10" viewBox="0 0 12 10" fill="none">
@@ -1662,6 +1780,7 @@ function renderExItem(ex, isDone, uid) {
       <div class="ex-name">${ex.name}</div>
       <div class="ex-sets">${ex.sets}</div>
       ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
+      ${imgHtml}
     </div>
   </div>`;
 }
@@ -1688,6 +1807,16 @@ function renderUserSchedule() {
 
   function exRow(ex, num) {
     const catClass = ex.cat === '스트레칭' ? 'tag-stretch-ex' : 'tag-power';
+    const imgs = [[ex.img1,'시작'], [ex.img2,'끝']].filter(([u]) => u);
+    const imgHtml = imgs.length ? `
+      <div class="ex-imgs">
+        ${imgs.map(([url, label]) => `
+          <div>
+            <div class="img-label">${label} 자세</div>
+            <img class="ex-img-thumb" src="${url}" alt="${label} 자세" loading="lazy"
+              onclick="showExImg('${url}','${ex.name} — ${label} 자세')" onerror="this.style.display='none'">
+          </div>`).join('')}
+      </div>` : '';
     return `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
       <div class="flex items-center gap-8" style="margin-bottom:5px">
         <span style="font-size:11px;font-weight:700;color:var(--muted);min-width:20px">${num}.</span>
@@ -1697,6 +1826,7 @@ function renderUserSchedule() {
       <div style="padding-left:28px">
         <div style="font-size:12px;color:var(--muted);margin-bottom:${ex.note?'4px':'0'}">${ex.sets}</div>
         ${ex.note ? `<div style="font-size:12px;color:var(--blue);line-height:1.5">★ ${ex.note}</div>` : ''}
+        ${imgHtml}
       </div>
     </div>`;
   }
@@ -2189,6 +2319,16 @@ function appendCoachChatMsg(type, text) {
 /* ════════════════════════════════════════════════════
    TOAST
 ═══════════════════════════════════════════════════════ */
+function showExImg(url, caption) {
+  const overlay = document.createElement('div');
+  overlay.className = 'img-modal-overlay';
+  overlay.innerHTML = `
+    <img src="${url}" alt="${caption}" onerror="this.src=''">
+    <div class="img-modal-close">탭하면 닫힘 · ${caption}</div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+}
+
 function showToast(msg, type) {
   const t = document.createElement('div');
   t.textContent = msg;
