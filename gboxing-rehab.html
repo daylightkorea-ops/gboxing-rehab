@@ -222,6 +222,11 @@ textarea.input{resize:vertical;min-height:72px}
 .records-table td{padding:10px;border-bottom:1px solid rgba(43,48,69,.6)}
 .records-table tr:last-child td{border-bottom:none}
 .records-table tr:hover td{background:rgba(255,255,255,.02)}
+/* 클릭으로 전체 텍스트 펼치기 */
+.rec-cell{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+          cursor:pointer;transition:all .15s}
+.rec-cell:hover{color:var(--blue)}
+.rec-cell.expanded{white-space:normal;max-width:260px;overflow:visible}
 .pain-pill{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;
            border-radius:5px;font-size:12px;font-weight:700}
 .pain-low{background:var(--green-dim);color:var(--green)}
@@ -418,6 +423,8 @@ textarea.input{resize:vertical;min-height:72px}
       <div class="nav-section">코치</div>
       <a href="#" data-sv="a-yuchan">김유찬</a>
       <a href="#" data-sv="a-seungwoo">한승우</a>
+      <div class="nav-section">기록</div>
+      <a href="#" data-sv="a-records">전체 기록</a>
       <div class="nav-section">도구</div>
       <a href="#" data-sv="a-chat">AI 채팅</a>
       <a href="#" data-sv="a-settings">설정</a>
@@ -503,6 +510,33 @@ textarea.input{resize:vertical;min-height:72px}
         </div>
         <div class="schedule-grid" id="sched-seungwoo"></div>
         <div id="add-ex-seungwoo"></div>
+      </div>
+    </section>
+
+    <!-- ALL RECORDS -->
+    <section class="subview" id="a-records">
+      <div class="page-header flex justify-between items-center">
+        <div>
+          <div class="page-title">전체 기록</div>
+          <div class="page-desc">두 코치님의 재활 기록 통합 조회</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select id="records-filter-uid" class="input" style="width:auto;font-size:13px;padding:6px 10px"
+            onchange="renderAllRecords()">
+            <option value="all">전체</option>
+            <option value="yuchan">김유찬</option>
+            <option value="seungwoo">한승우</option>
+          </select>
+          <select id="records-filter-count" class="input" style="width:auto;font-size:13px;padding:6px 10px"
+            onchange="renderAllRecords()">
+            <option value="30">최근 30개</option>
+            <option value="60">최근 60개</option>
+            <option value="all">전체</option>
+          </select>
+        </div>
+      </div>
+      <div id="all-records-container">
+        <span class="text-muted text-sm">로딩 중…</span>
       </div>
     </section>
 
@@ -959,6 +993,17 @@ async function initDb() {
         if (d.provider)  lsSet('gb_ai_provider', d.provider);
       }
     }, () => {});
+    // Subscribe to config (Sheets URL sync)
+    db.doc('settings/config').onSnapshot(snap => {
+      if (snap.exists) {
+        const d = snap.data();
+        if (d.sheetsUrl) {
+          lsSet('gb_sheets_url', d.sheetsUrl);
+          const el = document.getElementById('sheets-url');
+          if (el) el.value = d.sheetsUrl;
+        }
+      }
+    }, () => {});
     // Subscribe to rehab reference material
     db.doc('settings/rehabRef').onSnapshot(snap => {
       if (snap.exists) {
@@ -987,6 +1032,13 @@ async function initDb() {
       if (akData.openai)    lsSet('gb_ai_key_openai', akData.openai);
       if (akData.anthropic) lsSet('gb_ai_key_anthropic', akData.anthropic);
       if (akData.provider)  lsSet('gb_ai_provider', akData.provider);
+    }
+    // Load Sheets URL from DB
+    const cfgSnap = await db.doc('settings/config').get();
+    if (cfgSnap.exists && cfgSnap.data().sheetsUrl) {
+      lsSet('gb_sheets_url', cfgSnap.data().sheetsUrl);
+      const el = document.getElementById('sheets-url');
+      if (el) el.value = cfgSnap.data().sheetsUrl;
     }
   } catch(e) { console.warn('DB unavailable, using localStorage', e); }
   // localStorage fallback for profiles
@@ -1114,6 +1166,7 @@ function initAdmin() {
       document.getElementById(a.dataset.sv).classList.add('active');
       if (a.dataset.sv === 'a-yuchan') renderCoachWeek('yuchan');
       if (a.dataset.sv === 'a-seungwoo') renderCoachWeek('seungwoo');
+      if (a.dataset.sv === 'a-records') renderAllRecords();
       if (a.dataset.sv === 'a-settings') loadProfileUI();
     });
   });
@@ -1404,11 +1457,66 @@ function renderAdminRecords(uid) {
       <td>${r.sleep}h</td>
       <td><span class="pain-pill ${pm>=7?'pain-high':pm>=4?'pain-mid':'pain-low'}">${pm}</span></td>
       <td><span class="pain-pill ${pe>=7?'pain-high':pe>=4?'pain-mid':'pain-low'}">${pe}</span></td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.food||'-'}</td>
-      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.exercise||'-'}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.notes||'-'}</td>
+      <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.food||'-'}</td>
+      <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.exercise||'-'}</td>
+      <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.notes||'-'}</td>
     </tr>`;
   }).join('')}</tbody>`;
+}
+
+/* ─── All records (combined view) ─── */
+function renderAllRecords() {
+  const container = document.getElementById('all-records-container');
+  if (!container) return;
+
+  const filterUid   = document.getElementById('records-filter-uid')?.value || 'all';
+  const filterCount = document.getElementById('records-filter-count')?.value || '30';
+
+  // Build merged list with uid tag
+  let merged = [];
+  const uids = filterUid === 'all' ? ['yuchan','seungwoo'] : [filterUid];
+  uids.forEach(uid => {
+    (records[uid] || []).forEach(r => merged.push({...r, _uid: uid}));
+  });
+
+  // Sort newest first
+  merged.sort((a, b) => (b.date||'').localeCompare(a.date||''));
+
+  // Limit
+  if (filterCount !== 'all') merged = merged.slice(0, parseInt(filterCount));
+
+  if (!merged.length) {
+    container.innerHTML = '<div class="card"><p class="text-muted text-sm" style="padding:16px">기록 없음</p></div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="card" style="overflow-x:auto">
+    <table class="records-table" style="width:100%">
+      <thead><tr>
+        <th>코치</th><th>날짜</th><th>수면</th><th>아침 통증</th><th>저녁 통증</th>
+        <th>식사</th><th>운동</th><th>특이사항</th>
+      </tr></thead>
+      <tbody>
+        ${merged.map(r => {
+          const name = USERS[r._uid]?.name || r._uid;
+          const pm = r.painMorning||0, pe = r.painEvening||0;
+          const badge = r._uid === 'yuchan'
+            ? `<span style="background:rgba(224,45,60,.12);color:var(--red);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">${name}</span>`
+            : `<span style="background:rgba(59,130,246,.12);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">${name}</span>`;
+          return `<tr>
+            <td>${badge}</td>
+            <td style="white-space:nowrap">${formatDate(r.date)}</td>
+            <td>${r.sleep||'-'}h</td>
+            <td><span class="pain-pill ${pm>=7?'pain-high':pm>=4?'pain-mid':'pain-low'}">${pm}</span></td>
+            <td><span class="pain-pill ${pe>=7?'pain-high':pe>=4?'pain-mid':'pain-low'}">${pe}</span></td>
+            <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.food||'-'}</td>
+            <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.exercise||'-'}</td>
+            <td class="rec-cell" onclick="this.classList.toggle('expanded')" title="클릭하여 전체 보기">${r.notes||'-'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
 }
 
 /* ─── Add exercise form ─── */
@@ -1471,10 +1579,10 @@ function deleteEx(uid, id) {
 }
 
 async function saveSchedule(uid) {
-  if (db) {
-    try { await db.doc(`schedules/${uid}`).set({items: schedules[uid]}); } catch(e) { console.warn(e); }
-  }
   lsSet(`gb_sched_${uid}`, schedules[uid]);
+  if (db) {
+    await db.doc(`schedules/${uid}`).set({items: schedules[uid]});
+  }
 }
 
 /* ─── Settings ─── */
@@ -1491,9 +1599,16 @@ async function saveApiKey() {
   }
   showToast('API 키 저장됨 (전체 기기 동기화)');
 }
-function saveSettings() {
-  lsSet('gb_sheets_url', document.getElementById('sheets-url').value.trim());
-  showToast('설정 저장됨');
+async function saveSettings() {
+  const url = document.getElementById('sheets-url').value.trim();
+  lsSet('gb_sheets_url', url);
+  // Firebase에 저장 → 코치 기기에서도 자동으로 읽힘
+  if (db) {
+    try {
+      await db.doc('settings/config').set({ sheetsUrl: url }, { merge: true });
+    } catch(e) { console.warn('Sheets URL sync failed', e); }
+  }
+  showToast('설정 저장됨 (전체 기기 동기화)');
 }
 function savePw(uid) {
   const pw = document.getElementById(`pw-${uid}`).value;
@@ -1554,16 +1669,18 @@ async function saveRehabRef() {
   showToast('재활 참고자료 저장됨');
 }
 
+// 전역 변수에 대기 중인 스케쥴 저장 (onclick 속성에 JSON 넣으면 큰따옴표 충돌)
+let _pendingSchedule = null;
+
 function showScheduleApplyBtn(jsonStr, uid) {
-  // Only show in admin view
   try {
     const items = JSON.parse(jsonStr);
     if (!Array.isArray(items)) return;
+    _pendingSchedule = items; // 전역 보관
     const msgContainer = document.getElementById('chat-messages');
     const applyEl = document.createElement('div');
     applyEl.className = 'msg msg-system';
     applyEl.style.cssText = 'border:1px solid var(--blue);background:rgba(79,142,247,.08);margin-top:8px';
-    const targetLabel = uid ? USERS[uid].name : '코치 선택 필요';
     applyEl.innerHTML = `
       <div style="font-size:12px;color:var(--blue);margin-bottom:10px">
         <strong>운동 스케쥴 감지됨</strong> — ${items.length}개 운동
@@ -1575,40 +1692,46 @@ function showScheduleApplyBtn(jsonStr, uid) {
       </div>
       ${uid ? `
         <div class="flex gap-8">
-          <button class="btn btn-red btn-sm" onclick="applySchedule('${uid}', ${JSON.stringify(jsonStr).replace(/'/g,"\\'")})" style="flex:1">
-            ${USERS[uid].name} 스케쥴 적용
+          <button class="btn btn-red btn-sm" onclick="applySchedule('${uid}')" style="flex:1">
+            ✓ ${USERS[uid].name} 스케쥴 적용하기
           </button>
-          <button class="btn btn-ghost btn-sm" onclick="this.closest('.msg').remove()">취소</button>
+          <button class="btn btn-ghost btn-sm" onclick="this.closest('.msg').remove();_pendingSchedule=null">취소</button>
         </div>` : ''}`;
     msgContainer.appendChild(applyEl);
     msgContainer.scrollTop = msgContainer.scrollHeight;
   } catch(e) { console.warn('Schedule parse error', e); }
 }
 
-async function applySchedule(uid, jsonStr) {
+async function applySchedule(uid) {
+  const raw = _pendingSchedule;
+  if (!raw) { showToast('적용할 스케쥴이 없습니다. 다시 AI에게 요청하세요.'); return; }
+  const prefix = uid === 'yuchan' ? 'y' : 's';
+  const newItems = raw.map((e, i) => ({
+    id: `${prefix}gpt${Date.now()}_${i}`,
+    cat: e.cat || '근력',
+    name: e.name || '운동',
+    sets: e.sets || '',
+    note: e.note || '',
+    video: e.video || ''
+  }));
+  // 즉시 메모리 + localStorage 반영
+  schedules[uid] = newItems;
+  lsSet(`gb_sched_${uid}`, newItems);
+  // Firebase 저장 (saveSchedule 재사용 — 에러가 있으면 toast로 표시)
   try {
-    const raw = JSON.parse(jsonStr);
-    // Assign IDs and cat default
-    const prefix = uid === 'yuchan' ? 'y' : 's';
-    const newItems = raw.map((e, i) => ({
-      id: `${prefix}gpt${Date.now()}_${i}`,
-      cat: e.cat || '근력',
-      name: e.name || '운동',
-      sets: e.sets || '',
-      note: e.note || ''
-    }));
-    schedules[uid] = newItems;
-    if (db) {
-      try { await db.doc(`schedules/${uid}`).set({items: newItems}); } catch(e) {}
-    }
-    lsSet(`gb_sched_${uid}`, newItems);
-    showToast(`${USERS[uid].name} 스케쥴 업데이트 완료 (${newItems.length}개 운동)`);
-    // Remove apply card
-    document.querySelectorAll('#chat-messages .msg-system').forEach(el => {
-      if (el.textContent.includes('운동 스케쥴 감지됨')) el.remove();
-    });
-    appendChatMsg('system', `✓ ${USERS[uid].name} 코치님 스케쥴이 업데이트되었습니다. (${newItems.length}개 운동)`);
-  } catch(e) { showToast('스케쥴 적용 실패: ' + e.message); }
+    await saveSchedule(uid);
+  } catch(e) {
+    showToast('Firebase 저장 실패: ' + e.message);
+    console.error('applySchedule Firebase error', e);
+  }
+  _pendingSchedule = null;
+  // 적용 카드 제거 + 확인 메시지
+  document.querySelectorAll('#chat-messages .msg-system').forEach(el => {
+    if (el.textContent.includes('운동 스케쥴 감지됨')) el.remove();
+  });
+  appendChatMsg('system', `✓ ${USERS[uid].name} 코치님 스케쥴이 업데이트되었습니다. (${newItems.length}개 운동)`);
+  showToast(`${USERS[uid].name} 스케쥴 업데이트 완료 (${newItems.length}개 운동)`);
+  renderAdminSched(uid);
 }
 
 /* ════════════════════════════════════════════════════
@@ -1921,15 +2044,20 @@ async function submitLog() {
   const sheetsUrl = lsGet('gb_sheets_url', '');
   if (sheetsUrl) {
     try {
-      await fetch(sheetsUrl, {method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(record)});
-      status.textContent = '구글 시트에 저장되었습니다';
+      // Apps Script는 CORS preflight를 지원 안 해서 no-cors 모드 사용
+      await fetch(sheetsUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      });
+      status.textContent = '기록 전송됨 (Firebase + 구글 시트)';
     } catch(e) {
-      status.textContent = '로컬에만 저장됨 (시트 연결 확인)';
+      console.warn('Sheets error:', e);
+      status.textContent = 'Firebase 저장 완료 (시트 연결 확인 필요)';
     }
   } else {
-    status.textContent = '저장되었습니다 (구글 시트 미연동)';
+    status.textContent = '저장되었습니다 ✓';
   }
   btn.disabled = false;
   btn.textContent = '기록 전송하기';
