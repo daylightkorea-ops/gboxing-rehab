@@ -679,6 +679,7 @@ textarea.input{resize:vertical;min-height:72px}
         <div id="cd-number"></div>
         <div class="countdown-label" id="cd-label"></div>
         <div class="countdown-date" id="cd-date"></div>
+        <div id="cd-goal"></div>
       </div>
       <!-- Pain trend chart -->
       <div id="pain-trend-wrap" style="display:none;margin:16px 0 4px">
@@ -822,8 +823,8 @@ textarea.input{resize:vertical;min-height:72px}
 /* ════════════════════════════════════════════════════
    CONSTANTS & DEFAULTS
 ═══════════════════════════════════════════════════════ */
-const START_DATE = '2026-09-11';
-const TOTAL_DAYS = 31;
+const START_DATE = '2026-10-12';
+const TOTAL_DAYS = 30;
 
 const USERS = {
   admin:    { name:'관리자', pw:'admin1234' },
@@ -1763,18 +1764,35 @@ function renderCountdown() {
   const cdNum = document.getElementById('cd-number');
   const cdLabel = document.getElementById('cd-label');
   const cdDate = document.getElementById('cd-date');
+  const cdGoal = document.getElementById('cd-goal');
+
+  // 코치별 2기 목표
+  const GOALS = {
+    yuchan:   ['🪑 앉았다 일어설 때 통증 강도 낮추기', '🏃 일상생활 통증 강도 -2'],
+    seungwoo: ['💪 운동 강도 올리기', '😌 통증 수준 유지']
+  };
+  const uid = currentUser;
+  const goalLines = GOALS[uid] || [];
+  if (cdGoal) {
+    cdGoal.innerHTML = goalLines.length
+      ? `<div style="margin-top:12px;display:inline-flex;flex-direction:column;gap:4px;text-align:left">
+          ${goalLines.map(g => `<span style="font-size:12px;color:var(--muted)">${g}</span>`).join('')}
+         </div>`
+      : '';
+  }
+
   if (cd.type === 'pre') {
     cdNum.innerHTML = `<div class="countdown-pre">D-${cd.days}</div>`;
     cdLabel.textContent = '시작까지 남은 날';
     cdDate.textContent = `프로그램 시작: ${formatDate(START_DATE)}`;
   } else if (cd.type === 'done') {
     cdNum.innerHTML = `<div class="countdown-done">완료</div>`;
-    cdLabel.textContent = '31일 재활 프로그램 완료!';
+    cdLabel.textContent = '30일 재활 2기 완료!';
     cdDate.textContent = '';
   } else {
     cdNum.innerHTML = `<div class="countdown-d">D-${String(cd.d).padStart(2,'0')}</div>`;
-    cdLabel.textContent = `재활 ${TOTAL_DAYS-cd.d+1}일차 · ${cd.d}일 남음`;
-    cdDate.textContent = `${formatDate(todayStr())} · 목표 완주: ${formatDate('2026-10-11')}`;
+    cdLabel.textContent = `재활 2기 ${TOTAL_DAYS-cd.d+1}일차 · ${cd.d}일 남음`;
+    cdDate.textContent = `${formatDate(todayStr())} · 목표 완주: ${formatDate('2026-11-10')}`;
   }
 }
 
