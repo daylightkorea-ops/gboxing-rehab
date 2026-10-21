@@ -951,7 +951,7 @@ async function initDb() {
     // Load records
     const today = todayStr();
     ['yuchan','seungwoo'].forEach(uid => {
-      db.collection('records').where('user','==',uid).orderBy('date','desc').limit(90)
+      db.collection('records').where('user','==',uid).limit(90)
         .onSnapshot(snap => {
           records[uid] = snap.docs.map(d => ({id:d.id, ...d.data()}))
             .sort((a,b) => b.date > a.date ? 1 : -1);
